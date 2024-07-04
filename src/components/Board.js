@@ -38,7 +38,7 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'w', position: '7,7' },
 };
 
-const Board = () => {
+const Board = ({ sendMoveData }) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
@@ -57,6 +57,18 @@ const Board = () => {
       const newBoard = { ...board };
       newBoard[draggedOverSquare] = draggedPiece;
       newBoard[draggedPiece.position] = null;
+      const from = draggedPiece.position;
+      const to = draggedOverSquare;
+      const moveData = {
+        eventTime: new Date().toISOString(),
+        from,
+        to,
+        player: {
+          color: draggedPiece.color,
+          team: draggedPiece.color === 'w' ? 'White' : 'Black'
+        }
+      };
+      sendMoveData(moveData); // Send move data to the server
       draggedPiece.position = draggedOverSquare; // Update the piece's position
       setBoard(newBoard);
       setDraggedPiece(null);

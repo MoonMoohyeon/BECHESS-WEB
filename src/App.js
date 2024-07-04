@@ -55,7 +55,18 @@ const App = () => {
     useEffect(() => {
       console.log("클라이언트 연결됨", client.current.connected);
       connect();
+      return () => disConnect();
     }, []);
+
+    const sendMoveData = (moveData) => {
+      if (client.current.connected) {
+        client.current.publish({
+          destination: '/chess-game/move',
+          body: JSON.stringify(moveData)
+        });
+                    moveSound.play();
+      }
+    };
 
     // const sendMove = (from, to) => {
     //     if (client) {
@@ -70,11 +81,10 @@ const App = () => {
     //         moveSound.play();
     //     }
     // };
-
+    
     return (
       <div className="App">
-        <p>testtest</p>
-        <Board />
+        <Board sendMoveData={sendMoveData} />
       </div>
     );
 };
