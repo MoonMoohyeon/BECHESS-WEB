@@ -8,7 +8,7 @@ const App = () => {
 
     const connect = () => {
       client.current = new StompJs.Client({
-        brokerURL: "ws://124.51.252.25:9090/chess", // Updated WebSocket URL
+        brokerURL: "ws://localhost:9090/chess", // Updated WebSocket URL
         connectHeaders: {
         },
         debug: function (str) {
@@ -64,7 +64,7 @@ const App = () => {
           destination: '/chess-game/move',
           body: JSON.stringify(moveData)
         });
-                    moveSound.play();
+                    // moveSound.play();
       }
     };
 
