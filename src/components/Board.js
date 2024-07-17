@@ -38,6 +38,63 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'w', position: '7,7' },
 };
 
+//각 기물이 움직일 수 있는지 여부를 나타내는 함수
+const isValidMove = (piece, from, to, board) => {
+  const [fromX, fromY] = from.split(',').map(Number);
+  const [toX, toY] = to.split(',').map(Number);
+
+  switch (piece.type) {
+    case 'p':
+      // 폰의 움직임 검증
+      return isValidPawnMove(piece, fromX, fromY, toX, toY, board);
+    /*
+    case 'r':
+      // 룩의 움직임 검증
+      return isValidRookMove(fromX, fromY, toX, toY, board);
+    case 'n':
+      // 나이트의 움직임 검증
+      return isValidKnightMove(fromX, fromY, toX, toY);
+    case 'b':
+      // 비숍의 움직임 검증
+      return isValidBishopMove(fromX, fromY, toX, toY, board);
+    case 'q':
+      // 퀸의 움직임 검증
+      return isValidQueenMove(fromX, fromY, toX, toY, board);
+    case 'k':
+      // 킹의 움직임 검증
+      return isValidKingMove(fromX, fromY, toX, toY, board);
+    
+    default:
+      return false;
+    */
+  }
+};
+
+const isValidPawnMove = (piece, fromX, fromY, toX, toY, board) => {
+  const direction = piece.color === 'w' ? -1 : 1; // 백은 위로, 흑은 아래로 이동
+  const startRow = piece.color === 'w' ? 6 : 1;
+
+  // 앞으로 한 칸 이동
+  if (toX === fromX && toY === fromY + direction && !board[`${toX},${toY}`]) {
+    return true;
+  }
+
+  // 처음 두 칸 이동
+  if (fromY === startRow && toX === fromX && toY === fromY + 2 * direction &&
+    !board[`${toX},${toY}`] && !board[`${toX},${fromY + direction}`]) {
+    return true;
+  }
+
+  // 대각선 공격
+  if (Math.abs(toX - fromX) === 1 && toY === fromY + direction &&
+    board[`${toX},${toY}`] && board[`${toX},${toY}`].color !== piece.color) {
+    return true;
+  }
+
+  // 이 외의 경우는 유효하지 않음
+  return false;
+};
+
 const Board = ({ sendMoveData }) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
@@ -59,18 +116,27 @@ const Board = ({ sendMoveData }) => {
       newBoard[draggedPiece.position] = null;
       const from = draggedPiece.position;
       const to = draggedOverSquare;
-      const moveData = {
-        eventTime: new Date().toISOString(),
-        from,
-        to,
-        player: {
-          color: draggedPiece.color,
-          team: draggedPiece.color === 'w' ? 'White' : 'Black'
-        }
-      };
-      sendMoveData(moveData); // Send move data to the server
-      draggedPiece.position = draggedOverSquare; // Update the piece's position
-      setBoard(newBoard);
+
+      if (isValidMove(draggedPiece, from, to, board)) {
+        const newBoard = { ...board };
+        newBoard[draggedOverSquare] = draggedPiece;
+        delete newBoard[draggedPiece.position];
+
+        const moveData = {
+          eventTime: new Date().toISOString(),
+          from,
+          to,
+          player: {
+            color: draggedPiece.color,
+            team: draggedPiece.color === 'w' ? 'White' : 'Black'
+          }
+        };
+
+        sendMoveData(moveData); // Send move data to the server
+        draggedPiece.position = draggedOverSquare; // Update the piece's position
+        setBoard(newBoard);
+      }
+
       setDraggedPiece(null);
       setDraggedOverSquare(null);
     }
