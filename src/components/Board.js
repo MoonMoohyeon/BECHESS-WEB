@@ -38,6 +38,7 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'w', position: '7,7', moved: false },
 };
 
+<<<<<<< HEAD
 //각 기물이 움직일 수 있는지 여부를 나타내는 함수
 const isValidMove = (piece, from, to, board) => {
   const [fromX, fromY] = from.split(',').map(Number);
@@ -260,6 +261,8 @@ const isValidKingMove = (fromX, fromY, toX, toY, board) => {
 };
 
 
+=======
+>>>>>>> 4ca84c4 (STOMP)
 const Board = ({ sendMoveData }) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
@@ -281,6 +284,7 @@ const Board = ({ sendMoveData }) => {
       newBoard[draggedPiece.position] = null;
       const from = draggedPiece.position;
       const to = draggedOverSquare;
+<<<<<<< HEAD
 
       if (isValidMove(draggedPiece, from, to, board)) {
         const newBoard = { ...board };
@@ -316,6 +320,20 @@ const Board = ({ sendMoveData }) => {
         setBoard(newBoard);
       }
 
+=======
+      const moveData = {
+        eventTime: new Date().toISOString(),
+        from,
+        to,
+        player: {
+          color: draggedPiece.color,
+          team: draggedPiece.color === 'w' ? 'White' : 'Black'
+        }
+      };
+      sendMoveData(moveData); // Send move data to the server
+      draggedPiece.position = draggedOverSquare; // Update the piece's position
+      setBoard(newBoard);
+>>>>>>> 4ca84c4 (STOMP)
       setDraggedPiece(null);
       setDraggedOverSquare(null);
     }

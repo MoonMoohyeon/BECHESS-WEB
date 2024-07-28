@@ -2,15 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as StompJs from '@stomp/stompjs';
 import Board from './components/Board';
 import './styles.css';
+import moveSound from './move.mp3'; // Import the move.mp3 file
 
 const App = () => {
     const client = useRef({});
+    const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
 
     const connect = () => {
       client.current = new StompJs.Client({
         brokerURL: "ws://localhost:9090/chess", // Updated WebSocket URL
-        connectHeaders: {
-        },
+        connectHeaders: {},
         debug: function (str) {
           console.log(str);
         },
@@ -18,7 +19,7 @@ const App = () => {
           console.log("onConnect 실행됨...");
           subscribe();
           client.current.publish({
-            destination: `/chess-game`,
+            destination: `/app/join`,
             body: "Hello world",
           });
         },
@@ -33,7 +34,7 @@ const App = () => {
   
     const subscribe = () => {
       const subscription = client.current.subscribe(
-        `/chess-game`,
+        `/topic/message`,
         msg_callback
       );
       return subscription;
@@ -53,34 +54,21 @@ const App = () => {
     };
   
     useEffect(() => {
-      console.log("클라이언트 연결됨", client.current.connected);
       connect();
+      console.log("클라이언트 연결됨", client.current.connected);
       return () => disConnect();
     }, []);
 
     const sendMoveData = (moveData) => {
+      console.log(moveData)
       if (client.current.connected) {
         client.current.publish({
-          destination: '/chess-game/move',
+          destination: '/app/move',
           body: JSON.stringify(moveData)
         });
-                    // moveSound.play();
+        moveSoundRef.current.play(); // Play the move sound
       }
     };
-
-    // const sendMove = (from, to) => {
-    //     if (client) {
-    //         client.publish({
-    //             destination: '/app/move',
-    //             body: JSON.stringify({
-    //                 move: { from, to },
-    //                 team: currentTeam,
-    //                 role: currentRole
-    //             })
-    //         });
-    //         moveSound.play();
-    //     }
-    // };
     
     return (
       <div className="App">
