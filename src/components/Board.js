@@ -16,13 +16,13 @@ const initialBoardSetup = {
   '1,1': { type: 'p', color: 'b', position: '1,1' },
   '2,1': { type: 'p', color: 'b', position: '2,1' },
   '3,1': { type: 'p', color: 'b', position: '3,1' },
-  '4,1': { type: 'p', color: 'b', position: '4,1' },
   '5,1': { type: 'p', color: 'b', position: '5,1' },
   '6,1': { type: 'p', color: 'b', position: '6,1' },
   '7,1': { type: 'p', color: 'b', position: '7,1' },
   '0,6': { type: 'p', color: 'w', position: '0,6' },
   '1,6': { type: 'p', color: 'w', position: '1,6' },
   '2,6': { type: 'p', color: 'w', position: '2,6' },
+  '4,1': { type: 'p', color: 'b', position: '4,1' },
   '3,6': { type: 'p', color: 'w', position: '3,6' },
   '4,6': { type: 'p', color: 'w', position: '4,6' },
   '5,6': { type: 'p', color: 'w', position: '5,6' },
@@ -68,11 +68,9 @@ const Board = ({ sendMoveData }) => {
           team: draggedPiece.color === 'w' ? 'White' : 'Black'
         }
       };
-
       sendMoveData(moveData); // Send move data to the server
       draggedPiece.position = draggedOverSquare; // Update the piece's position
       setBoard(newBoard);
-
       setDraggedPiece(null);
       setDraggedOverSquare(null);
     }

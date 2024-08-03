@@ -2,23 +2,29 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as StompJs from '@stomp/stompjs';
 import Board from './components/Board';
 import './styles.css';
+<<<<<<< HEAD
 import { useDispatch, useSelector } from 'react-redux';
 import moveSound from './move.mp3';
+=======
+import moveSound from './move.mp3'; // Import the move.mp3 file
+>>>>>>> ce8fb45e001a0e9180b573f8396d17616bc4442d
 
 const App = () => {
 
     const client = useRef({});
     const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
+<<<<<<< HEAD
 
     /*타이머*/
     const count = useSelector( (state) => state );
     const dispatch = useDispatch();
+=======
+>>>>>>> ce8fb45e001a0e9180b573f8396d17616bc4442d
 
     const connect = () => {
       client.current = new StompJs.Client({
         brokerURL: "ws://localhost:9090/chess", // Updated WebSocket URL
-        connectHeaders: {
-        },
+        connectHeaders: {},
         debug: function (str) {
           console.log(str);
         },
@@ -61,12 +67,13 @@ const App = () => {
     };
   
     useEffect(() => {
-      console.log("클라이언트 연결됨", client.current.connected);
       connect();
+      console.log("클라이언트 연결됨", client.current.connected);
       return () => disConnect();
     }, []);
 
     const sendMoveData = (moveData) => {
+      console.log(moveData)
       if (client.current.connected) {
         client.current.publish({
           destination: '/app/move',
@@ -75,6 +82,7 @@ const App = () => {
         moveSoundRef.current.play(); // Play the move sound
       }
     };
+<<<<<<< HEAD
 
     // const sendMove = (from, to) => {
     //     if (client) {
@@ -120,6 +128,8 @@ const App = () => {
         sendTimeUpMessage();
       }
     }, [count]);
+=======
+>>>>>>> ce8fb45e001a0e9180b573f8396d17616bc4442d
     
     return (
       <div className="App">
