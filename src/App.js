@@ -2,9 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as StompJs from '@stomp/stompjs';
 import Board from './components/Board';
 import './styles.css';
+import { useDispatch, useSelector } from 'react-redux';
+import moveSound from './move.mp3';
 
 const App = () => {
+
     const client = useRef({});
+    const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
+
+    /*타이머*/
+    const count = useSelector( (state) => state );
+    const dispatch = useDispatch();
 
     const connect = () => {
       client.current = new StompJs.Client({
@@ -18,7 +26,7 @@ const App = () => {
           console.log("onConnect 실행됨...");
           subscribe();
           client.current.publish({
-            destination: `/chess-game`,
+            destination: `/app/join`,
             body: "Hello world",
           });
         },
@@ -33,7 +41,7 @@ const App = () => {
   
     const subscribe = () => {
       const subscription = client.current.subscribe(
-        `/chess-game`,
+        `/topic/message`,
         msg_callback
       );
       return subscription;
@@ -61,10 +69,10 @@ const App = () => {
     const sendMoveData = (moveData) => {
       if (client.current.connected) {
         client.current.publish({
-          destination: '/chess-game/move',
+          destination: '/app/move',
           body: JSON.stringify(moveData)
         });
-                    // moveSound.play();
+        moveSoundRef.current.play(); // Play the move sound
       }
     };
 
@@ -81,12 +89,45 @@ const App = () => {
     //         moveSound.play();
     //     }
     // };
+
+    //count useEfferct
+    useEffect(() => {
+      //1초마다 count 값 1 감소시킨다.
+      const timer = setInterval(() => {
+        dispatch({ type: 'DECREASE_COUNT' });
+      }, 1000);
+  
+      return () => clearInterval(timer);
+    }, [count]);
+
+    //count가 0이 되었을 때 사용할 함수
+    const sendTimeUpMessage = () => {
+      //client가 연결 가능한지 확인
+      if (client.current.connected){
+        //메시지 보내기
+        client.current.publish({
+          destination: '/app/timeUp', // 스프링 부트 컨트롤러의 엔드포인트
+          body: "Time is up!", //전송할 메시지 내용
+        })
+        console.log("메시지를 성공적으로 전송했습니다.");
+      } else{
+        console.log("WebSocket 연결이 되어 있지 않습니다.")
+      }
+    }
+
+    useEffect(() => {
+      if (count === 0){
+        sendTimeUpMessage();
+      }
+    }, [count]);
     
     return (
       <div className="App">
+        <h2>남은시간 : {count}초</h2>
         <Board sendMoveData={sendMoveData} />
       </div>
     );
 };
 
 export default App;
+
