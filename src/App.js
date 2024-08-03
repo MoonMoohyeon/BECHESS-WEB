@@ -2,29 +2,26 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as StompJs from '@stomp/stompjs';
 import Board from './components/Board';
 import './styles.css';
-<<<<<<< HEAD
 import { useDispatch, useSelector } from 'react-redux';
 import moveSound from './move.mp3';
-=======
-import moveSound from './move.mp3'; // Import the move.mp3 file
->>>>>>> ce8fb45e001a0e9180b573f8396d17616bc4442d
 
 const App = () => {
 
     const client = useRef({});
     const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
-<<<<<<< HEAD
 
     /*타이머*/
     const count = useSelector( (state) => state );
     const dispatch = useDispatch();
-=======
->>>>>>> ce8fb45e001a0e9180b573f8396d17616bc4442d
+
+    /*보드 반전(방향 상태) 관리*/
+    const [isReversed, setIsReversed] = useState(false);
 
     const connect = () => {
       client.current = new StompJs.Client({
         brokerURL: "ws://localhost:9090/chess", // Updated WebSocket URL
-        connectHeaders: {},
+        connectHeaders: {
+        },
         debug: function (str) {
           console.log(str);
         },
@@ -67,8 +64,8 @@ const App = () => {
     };
   
     useEffect(() => {
-      connect();
       console.log("클라이언트 연결됨", client.current.connected);
+      connect();
       return () => disConnect();
     }, []);
 
@@ -82,21 +79,6 @@ const App = () => {
         moveSoundRef.current.play(); // Play the move sound
       }
     };
-<<<<<<< HEAD
-
-    // const sendMove = (from, to) => {
-    //     if (client) {
-    //         client.publish({
-    //             destination: '/app/move',
-    //             body: JSON.stringify({
-    //                 move: { from, to },
-    //                 team: currentTeam,
-    //                 role: currentRole
-    //             })
-    //         });
-    //         moveSound.play();
-    //     }
-    // };
 
     //count useEfferct
     useEffect(() => {
@@ -128,13 +110,12 @@ const App = () => {
         sendTimeUpMessage();
       }
     }, [count]);
-=======
->>>>>>> ce8fb45e001a0e9180b573f8396d17616bc4442d
     
     return (
       <div className="App">
         <h2>남은시간 : {count}초</h2>
-        <Board sendMoveData={sendMoveData} />
+        <button onClick={() => setIsReversed(!isReversed)}>보드 반전</button>
+        <Board sendMoveData={sendMoveData} isReversed={isReversed} />
       </div>
     );
 };

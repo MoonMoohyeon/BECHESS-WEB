@@ -38,7 +38,7 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'w', position: '7,7' },
 };
 
-const Board = ({ sendMoveData }) => {
+const Board = ({ sendMoveData, isReversed }) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
@@ -103,6 +103,10 @@ const Board = ({ sendMoveData }) => {
   const squares = [];
   for (let i = 0; i < 64; i++) {
     squares.push(renderSquare(i));
+  }
+
+  if (isReversed) {
+    squares.reverse();
   }
 
   return (
