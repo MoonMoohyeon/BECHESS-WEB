@@ -4,6 +4,7 @@ import Board from './components/Board';
 import './styles.css';
 import { useDispatch, useSelector } from 'react-redux';
 import moveSound from './move.mp3';
+import './App.css';
 
 const App = () => {
 
@@ -16,6 +17,14 @@ const App = () => {
 
     /*보드 반전(방향 상태) 관리*/
     const [isReversed, setIsReversed] = useState(false);
+    /*게임 시작 상태 관리*/
+    const [gameStarted, setGameStarted] = useState(false);
+    /*유효하지 않은  기물 움직임 메시지 설정*/
+    const [invalidMoveMessage, setInvalidMoveMessage] = useState('');
+    /*보드를 이전 상태로 돌리는데 사용할 변수*/
+    const [invalidMoveFlag, setInvalidMoveFlag] = useState(false);
+    /*보드를 리셋하는데 사용할 변수*/
+    const [resetBoardFlag, setResetBoardFlag] = useState(false);
 
     const connect = () => {
       client.current = new StompJs.Client({
@@ -54,6 +63,19 @@ const App = () => {
     const msg_callback = (message) => {
       if (message.body) {
         console.log("받아온 메시지 : " + message.body);
+
+        // gameStart 메시지를 받으면 게임 시작 상태 업데이트
+        if (message.body === 'gameStart') {
+          setGameStarted(true);
+        }
+        // 기물을 잘못 이동했을 경우 에러 메시지 설정
+        else if (message.body === 'invalidMove') {
+          setInvalidMoveMessage('잘못된 이동입니다.'); // 에러 메시지 설정
+          setTimeout(() => setInvalidMoveMessage(''), 1500); // 1.5초 후에 메시지 제거
+          //보드 이전 상태로 리셋
+          setInvalidMoveFlag(true);
+      }
+
       } else {
         console.log("메시지 is empty !!");
       }
@@ -113,10 +135,48 @@ const App = () => {
     
     return (
       <div className="App">
-        <h2>남은시간 : {count}초</h2>
-        <button onClick={() => setIsReversed(!isReversed)}>보드 반전</button>
-        <Board sendMoveData={sendMoveData} isReversed={isReversed} />
+      {!gameStarted ?(
+          <h3>대기 중... 게임이 곧 시작됩니다.</h3>
+        ) : (
+          <>
+          <header className="App-header">
+            <h3 className="timerText">남은시간 : {count}초</h3>
+            <button className="button1" onClick={() => setIsReversed(!isReversed)}>보드 반전</button>
+            <button className="button1" onClick={() => setResetBoardFlag(true)}>보드 초기화</button>
+          </header>
+
+          <main className="App-main">
+            <Board 
+            className="board" 
+            sendMoveData={sendMoveData} 
+            isReversed={isReversed} 
+            resetBoardFlag={resetBoardFlag}
+            onResetComplete={() => setResetBoardFlag(false)} // 보드를 초기화 완료 시 플래그 해제
+            invalidMoveFlag={invalidMoveFlag}
+            onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
+            />
+          </main>
+
+          <footer className="App-footer">
+            {invalidMoveMessage && <h3 className="error-message">{invalidMoveMessage}</h3>}
+          </footer>
+          </>
+        )
+      }
       </div>
+      /* <div className="App">
+        {!gameStarted ?(
+          <h3>대기 중... 게임이 곧 시작됩니다.</h3>
+        ) : (
+          <>
+          <h2>남은시간 : {count}초</h2>
+          <Board sendMoveData={sendMoveData} isReversed={isReversed} />
+          <button onClick={() => setIsReversed(!isReversed)}>보드 반전</button>
+          {errorMessage && <h3 className="error-message">{errorMessage}</h3>}
+          </>
+        )
+        }
+      </div> */
     );
 };
 

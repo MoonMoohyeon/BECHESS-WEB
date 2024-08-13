@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Square from './Square';
 import Piece from './Piece';
 import '../css/app.css';
@@ -38,10 +38,25 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'b', position: '7,7' },
 };
 
-const Board = ({ sendMoveData, isReversed }) => {
+const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, invalidMoveFlag, onInvalidMoveFlagComplete }) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
+  //이전 보드 상태 저장
+  const prevBoard = useRef(initialBoardSetup)
+
+  useEffect(() =>{
+    if(resetBoardFlag){
+      //보드 초기화
+      setBoard(initialBoardSetup);
+      //보드 초기화를 완료했음을 알림
+      onResetComplete();
+    }
+    if(invalidMoveFlag){
+      setBoard(prevBoard.current); // 이전 보드 상태로 복구
+      onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
+    }
+  })
 
   const handleDragStart = (e, piece, position) => {
     setDraggedPiece({ ...piece, position });
@@ -54,6 +69,9 @@ const Board = ({ sendMoveData, isReversed }) => {
 
   const handleDrop = () => {
     if (draggedPiece && draggedOverSquare) {
+      //이전 보드 상태 저장
+      prevBoard.current = { ...board };
+
       const newBoard = { ...board };
       newBoard[draggedOverSquare] = draggedPiece;
       newBoard[draggedPiece.position] = null;
