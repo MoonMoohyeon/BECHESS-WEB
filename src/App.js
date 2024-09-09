@@ -77,9 +77,13 @@ const App = () => {
           return () => clearInterval(timer);
         }
 
-        // move 메시지를 받으면 타이머 실행
+        // move 메시지를 받으면 보드상태 업데이트 + 타이머 실행
         else if (message.body === 'move') {
-          setGameStarted(true);
+          //보드 상태 업데이트
+          /*
+          const parsedBoardState = JSON.parse(message.body); // 보드 상태를 JSON으로 파싱
+          console.log("현재 보드상태:", parsedBoardState);
+          */
           //1초마다 count 값 1 감소시킨다.
           const timer = setInterval(() => {
             dispatch({ type: 'DECREASE_COUNT' });
