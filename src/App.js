@@ -18,14 +18,19 @@ const App = () => {
     const [isReversed, setIsReversed] = useState(false);
     /*게임 시작 상태 관리*/
     const [gameStarted, setGameStarted] = useState(false);
+
     /*유효하지 않은  기물 움직임 메시지 설정*/
     const [invalidMoveMessage, setInvalidMoveMessage] = useState('');
     /*보드를 이전 상태로 돌리는데 사용할 변수*/
     const [invalidMoveFlag, setInvalidMoveFlag] = useState(false);
+
+    /*유효한 기물 움직임 Flag*/
+    const [validMoveFlag, setValidMoveFlag] = useState(false);
+
     /*보드를 리셋하는데 사용할 변수*/
     const [resetBoardFlag, setResetBoardFlag] = useState(false);
     /*보드 상태 관리*/
-    const [boardState, setBoardState] = useState(null);
+    //const [boardState, setBoardState] = useState(null);
 
     const connect = () => {
       client.current = new StompJs.Client({
@@ -64,50 +69,41 @@ const App = () => {
     const msg_callback = (message) => {
       if (message.body) {
         console.log("받아온 메시지 : " + message.body);
+        const action = message.body.split("\n");
+        //console.log(action[0])
 
         // gameStart 메시지를 받으면 게임 시작 상태 업데이트 + 타이머 실행
-        if (message.body === 'gameStart') {
+        if (action[0] === 'gameStart') {
           setGameStarted(true);
           setSeconds(initialSeconds)
           console.log("완료");
           return 0;
         }
-        /*
-        // move 메시지를 받으면 보드상태 업데이트 + 타이머 실행
-        else if (message.body === 'validMove') {
+        
+        // validMove 메시지를 받으면 보드상태 업데이트 + 타이머 실행
+        else if (action[0] === 'validMove') {
+          setValidMoveFlag(true); // 유효한 이동 플래그
+          for (let i = 1; i<=8; i++){
+            console.log(action[i]);
+          }
+          console.log("validMove!");
           setSeconds(initialSeconds);
-          console.log("validMove");
+
+          return 0;
         }
-        */
+        
         // 기물을 잘못 이동했을 경우 에러 메시지 설정
-        else if (message.body === 'invalidMove') {
+        else if (action[0] === 'invalidMove') {
+          setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
           setInvalidMoveMessage('잘못된 이동입니다.'); // 에러 메시지 설정
           setTimeout(() => setInvalidMoveMessage(''), 1500); // 1.5초 후에 메시지 제거
-          //보드 이전 상태로 리셋
-          setInvalidMoveFlag(true);
         }
 
         /*!!!!!!*/
+        
         else {
-          console.log("ValidMove 확인 완료!");
-          setSeconds(3);
-          
           return 0;
         }
-
-
-        // 기물을 제대로 움직인 경우 흑과 백 보드 에 모두 업데이트
-        /*
-        else {
-          try {
-              const parsedBoardState = JSON.parse(message.body); // 보드 상태를 JSON으로 파싱
-              console.log("현재 보드상태:", parsedBoardState.board);
-              //setBoardState(parsedBoardState); // 보드 상태 업데이트
-          } catch (error) {
-              console.error("Invalid board state received:", error);
-          }
-        } 
-        */ 
         
       } else {
         console.log("메시지 is empty !!");
@@ -165,7 +161,7 @@ const App = () => {
       }
     }, [seconds]);
     
-    //reset버튼 눌렀을 때 서버에 메시지를 보내는 하묘ㅜ
+    //reset버튼 눌렀을 때 서버에 메시지를 보내는 함수
     const resetMessage = () => {
       //client가 연결 가능한지 확인
       if (client.current.connected){
@@ -209,6 +205,9 @@ const App = () => {
             
             invalidMoveFlag={invalidMoveFlag}
             onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
+
+            validMoveFlag={validMoveFlag}
+            onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
 
             //boardState={boardState} //유효한 움직임에 대해 보드 상태 수정
             />
