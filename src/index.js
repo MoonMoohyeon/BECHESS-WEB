@@ -9,14 +9,21 @@ import { createStore } from 'redux';
 // import { store } from "./stores/index";
 
 const count = 3;
+const resetKey = 0;
 
 function reducer(state = count, action){
   switch (action.type){
     case 'DECREASE_COUNT':
       if(state > 0){
-        state = state -1;
+        state = state - 1;
+        console.log("state:", state)
         return state;
       }
+    /*
+    case 'RESET_COUNT':
+      console.log("!!!!!")
+      state = count;
+    */
     default:
       return state;
   }

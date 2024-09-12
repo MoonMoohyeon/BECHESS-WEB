@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as StompJs from '@stomp/stompjs';
 import Board from './components/Board';
 import './styles.css';
-import { useDispatch, useSelector } from 'react-redux';
 import moveSound from './move.mp3';
 import './App.css';
 
@@ -12,8 +11,8 @@ const App = () => {
     const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
 
     /*타이머*/
-    const count = useSelector( (state) => state );
-    const dispatch = useDispatch();
+    const initialSeconds = 3 //초기 시간 설정
+    const [seconds, setSeconds] = useState(0);
 
     /*보드 반전(방향 상태) 관리*/
     const [isReversed, setIsReversed] = useState(false);
@@ -69,29 +68,17 @@ const App = () => {
         // gameStart 메시지를 받으면 게임 시작 상태 업데이트 + 타이머 실행
         if (message.body === 'gameStart') {
           setGameStarted(true);
-          //1초마다 count 값 1 감소시킨다.
-          const timer = setInterval(() => {
-            dispatch({ type: 'DECREASE_COUNT' });
-          }, 1000);
-      
-          return () => clearInterval(timer);
+          setSeconds(initialSeconds)
+          console.log("완료");
+          return 0;
         }
-
+        /*
         // move 메시지를 받으면 보드상태 업데이트 + 타이머 실행
-        else if (message.body === 'move') {
-          //보드 상태 업데이트
-          /*
-          const parsedBoardState = JSON.parse(message.body); // 보드 상태를 JSON으로 파싱
-          console.log("현재 보드상태:", parsedBoardState);
-          */
-          //1초마다 count 값 1 감소시킨다.
-          const timer = setInterval(() => {
-            dispatch({ type: 'DECREASE_COUNT' });
-          }, 1000);
-      
-          return () => clearInterval(timer);
+        else if (message.body === 'validMove') {
+          setSeconds(initialSeconds);
+          console.log("validMove");
         }
-
+        */
         // 기물을 잘못 이동했을 경우 에러 메시지 설정
         else if (message.body === 'invalidMove') {
           setInvalidMoveMessage('잘못된 이동입니다.'); // 에러 메시지 설정
@@ -99,6 +86,16 @@ const App = () => {
           //보드 이전 상태로 리셋
           setInvalidMoveFlag(true);
         }
+
+        /*!!!!!!*/
+        else {
+          console.log("ValidMove 확인 완료!");
+          setSeconds(3);
+          
+          return 0;
+        }
+
+
         // 기물을 제대로 움직인 경우 흑과 백 보드 에 모두 업데이트
         /*
         else {
@@ -111,6 +108,7 @@ const App = () => {
           }
         } 
         */ 
+        
       } else {
         console.log("메시지 is empty !!");
       }
@@ -136,18 +134,18 @@ const App = () => {
         moveSoundRef.current.play(); // Play the move sound
       }
     };
-    /*
-    //count useEfferct
+    
+    //timer useEfferct
     useEffect(() => {
-      //1초마다 count 값 1 감소시킨다.
-      const timer = setInterval(() => {
-        dispatch({ type: 'DECREASE_COUNT' });
-      }, 1000);
-  
-      return () => clearInterval(timer);
-    }, [count]);
-    */
-    //count가 0이 되었을 때 사용할 함수
+      if(seconds>0){
+        const timer = setInterval(() => {
+          setSeconds(seconds-1);
+        }, 1000);
+        return () => clearInterval(timer);
+      }  
+    }, [seconds]);
+    
+    //seconds가 0이 되었을 때 서버로 메시지를 보내는 함수
     const sendTimeUpMessage = () => {
       //client가 연결 가능한지 확인
       if (client.current.connected){
@@ -156,13 +154,18 @@ const App = () => {
           destination: '/app/timeUp', // 스프링 부트 컨트롤러의 엔드포인트
           body: "Time is up!", //전송할 메시지 내용
         })
-        console.log("메시지를 성공적으로 전송했습니다.");
+        console.log("timeUp 메시지를 성공적으로 전송했습니다.");
       } else{
         console.log("WebSocket 연결이 되어 있지 않습니다.")
       }
     }
+    useEffect(() => {
+      if (seconds === 0){
+        sendTimeUpMessage();
+      }
+    }, [seconds]);
     
-    //reset버튼 눌렀을 때 서버에 메시지 전송하는데 사용할 함수
+    //reset버튼 눌렀을 때 서버에 메시지를 보내는 하묘ㅜ
     const resetMessage = () => {
       //client가 연결 가능한지 확인
       if (client.current.connected){
@@ -171,20 +174,16 @@ const App = () => {
           destination: '/app/reset', // 스프링 부트 컨트롤러의 엔드포인트
           body: "reset!", //전송할 메시지 내용
         })
-        console.log("메시지를 성공적으로 전송했습니다.");
+        console.log("reset 메시지를 성공적으로 전송했습니다.");
       } else{
         console.log("WebSocket 연결이 되어 있지 않습니다.")
       }
     }
-
     useEffect(() => {
-      if (count === 0){
-        sendTimeUpMessage();
-      }
       if (resetBoardFlag === true){
         resetMessage();
       }
-    }, [count]);
+    }, [resetBoardFlag]);
     
     return (
       <div className="App">
@@ -193,7 +192,7 @@ const App = () => {
         ) : (
           <>
           <header className="App-header">
-            <h3 className="timerText">남은시간 : {count}초</h3>
+            <h3 className="timerText">남은시간 : {seconds}초</h3>
             <button className="button1" onClick={() => setIsReversed(!isReversed)}>보드 반전</button>
             <button className="button1" onClick={() => setResetBoardFlag(true)}>보드 초기화</button>
           </header>
@@ -222,21 +221,7 @@ const App = () => {
         )
       }
       </div>
-      /* <div className="App">
-        {!gameStarted ?(
-          <h3>대기 중... 게임이 곧 시작됩니다.</h3>
-        ) : (
-          <>
-          <h2>남은시간 : {count}초</h2>
-          <Board sendMoveData={sendMoveData} isReversed={isReversed} />
-          <button onClick={() => setIsReversed(!isReversed)}>보드 반전</button>
-          {errorMessage && <h3 className="error-message">{errorMessage}</h3>}
-          </>
-        )
-        }
-      </div> */
     );
 };
 
 export default App;
-

@@ -3,7 +3,7 @@
   width: 100vw;
   text-align: center;
 }
-
+/*
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -14,7 +14,7 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
-
+*/
 .timerText{
   margin-top: auto;
   margin-bottom: auto;
@@ -61,7 +61,7 @@
 	height: 70px;
   margin: auto;
 }
-
+/*
 .App-link {
   color: #61dafb;
 }
@@ -74,3 +74,4 @@
     transform: rotate(360deg);
   }
 }
+*/
