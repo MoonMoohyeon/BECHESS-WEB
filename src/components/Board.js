@@ -83,13 +83,15 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
       const to = draggedOverSquare;
       const color = draggedPiece.color;
       const team = draggedPiece.color === 'w' ? 'White' : 'Black';
+      const type = draggedPiece.type;
 
       const moveData = {
         eventTime: new Date().toISOString(),
         from,
         to,
         color,
-        team
+        team,
+        type
       };
 
       //moveData.from = moveData.to
