@@ -38,7 +38,7 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'b', position: '7,7' },
 };
 
-const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, invalidMoveFlag, onInvalidMoveFlagComplete, validMoveFlag}) => {
+const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, invalidMoveFlag, onInvalidMoveFlagComplete, validMoveFlag, onValidMoveFlagComplete}) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
@@ -57,7 +57,7 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
       onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
     }
     if(validMoveFlag){
-      setBoard();
+      onValidMoveFlagComplete()
     }
     else{
       //setBoard(boardState);
@@ -81,12 +81,15 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
       newBoard[draggedPiece.position] = null;
       const from = draggedPiece.position;
       const to = draggedOverSquare;
+      const color = draggedPiece.color;
+      const team = draggedPiece.color === 'w' ? 'White' : 'Black';
+
       const moveData = {
         eventTime: new Date().toISOString(),
         from,
         to,
-        color: draggedPiece.color,
-        team: draggedPiece.color === 'w' ? 'White' : 'Black'
+        color,
+        team
       };
 
       //moveData.from = moveData.to
