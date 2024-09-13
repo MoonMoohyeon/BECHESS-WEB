@@ -13,6 +13,7 @@ const App = () => {
     /*타이머*/
     const initialSeconds = 3 //초기 시간 설정
     const [seconds, setSeconds] = useState(0);
+    const [timeOwner, setTimeOwner] = useState('w');
 
     /*보드 반전(방향 상태) 관리*/
     const [isReversed, setIsReversed] = useState(false);
@@ -30,7 +31,7 @@ const App = () => {
     /*보드를 리셋하는데 사용할 변수*/
     const [resetBoardFlag, setResetBoardFlag] = useState(false);
     /*보드 상태 관리*/
-    //const [boardState, setBoardState] = useState(null);
+    const [boardState, setBoardState] = useState('');
 
     const connect = () => {
       client.current = new StompJs.Client({
@@ -45,7 +46,7 @@ const App = () => {
           subscribe();
           client.current.publish({
             destination: `/app/join`,
-            body: "Hello world",
+            body: "Web",
           });
         },
         onStompError: (frame) => {
@@ -82,10 +83,9 @@ const App = () => {
         
         // validMove 메시지를 받으면 보드상태 업데이트 + 타이머 실행
         else if (action[0] === 'validMove') {
+          setBoardState(action[1]);
           setValidMoveFlag(true); // 유효한 이동 플래그
-          for (let i = 1; i<=8; i++){
-            console.log(action[i]);
-          }
+          console.log(action[1]);
           console.log("validMove!");
           setSeconds(initialSeconds);
 
@@ -148,15 +148,21 @@ const App = () => {
         //메시지 보내기
         client.current.publish({
           destination: '/app/timeUp', // 스프링 부트 컨트롤러의 엔드포인트
-          body: "Time is up!", //전송할 메시지 내용
+          body: timeOwner, //전송할 메시지 내용
         })
-        console.log("timeUp 메시지를 성공적으로 전송했습니다.");
+        console.log("TimeOwner:"+timeOwner+" 메시지를 성공적으로 전송했습니다.");
       } else{
         console.log("WebSocket 연결이 되어 있지 않습니다.")
       }
     }
     useEffect(() => {
       if (seconds === 0){
+        if(timeOwner == 'w'){
+          setTimeOwner('b');
+        }
+        else{
+          setTimeOwner('w');
+        }
         sendTimeUpMessage();
       }
     }, [seconds]);
@@ -209,7 +215,7 @@ const App = () => {
             validMoveFlag={validMoveFlag}
             onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
 
-            //boardState={boardState} //유효한 움직임에 대해 보드 상태 수정
+            boardState={boardState} //유효한 움직임에 대해 보드 상태
             />
           </main>
 
