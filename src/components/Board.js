@@ -38,12 +38,14 @@ const initialBoardSetup = {
   '7,7': { type: 'r', color: 'b', position: '7,7' },
 };
 
-const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, invalidMoveFlag, onInvalidMoveFlagComplete, validMoveFlag, onValidMoveFlagComplete}) => {
+const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, invalidMoveFlag, onInvalidMoveFlagComplete, validMoveFlag, onValidMoveFlagComplete, boardState}) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
+  //const [timeOwner, setTimeOwner] = useState('w');
   //이전 보드 상태 저장
   const prevBoard = useRef(initialBoardSetup)
+  //const upDatedBoard = useRef(initialBoardSetup)
 
   useEffect(() =>{
     if(resetBoardFlag){
@@ -57,12 +59,46 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
       onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
     }
     if(validMoveFlag){
-      onValidMoveFlagComplete()
+      const pieceInform = boardState.split(" "); //기물 정보
+      console.log(pieceInform[1]);
+      
+      const from = pieceInform[2];
+      const to = pieceInform[5];
+      const type = pieceInform[11];
+      const color = pieceInform[8];
+      const position = to;
+      console.log("from, to, type, color, position:",from, to, type, color, position);
+
+      const team = color;
+      // if(color == 'w'){
+      //   setTimeOwner('b');
+      // }
+      // else{
+      //   setTimeOwner('w');
+      // }
+
+      const upDatedBoard = { ...board};
+      upDatedBoard[from] = null;
+      upDatedBoard[to] = { type: type, color: color, position: position };
+
+      console.log("upDatedBoard.current[key]\n",upDatedBoard[to]);
+
+      setBoard(upDatedBoard);
+      console.log("board:\n",board);
+      
+      const moveData = {
+        eventTime: new Date().toISOString(),
+        from,
+        to,
+        color,
+        team,
+        type
+      };
+      sendMoveData(moveData);
+      
+      onValidMoveFlagComplete();
     }
-    else{
-      //setBoard(boardState);
-    }
-  })
+  },[resetBoardFlag, invalidMoveFlag, validMoveFlag])
 
   const handleDragStart = (e, piece, position) => {
     prevBoard.current = { ...board }; //기물을 옮기기 전 보드상태 저장
@@ -77,13 +113,17 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
   const handleDrop = () => {
     if (draggedPiece && draggedOverSquare) {
       const newBoard = { ...board };
-      newBoard[draggedOverSquare] = draggedPiece;
+      newBoard[draggedOverSquare] = { ...draggedPiece };
       newBoard[draggedPiece.position] = null;
       const from = draggedPiece.position;
       const to = draggedOverSquare;
       const color = draggedPiece.color;
       const team = draggedPiece.color === 'w' ? 'White' : 'Black';
       const type = draggedPiece.type;
+
+      /*드래그 기물 정보 기록*/ 
+      //setInforPieceType(type);
+      //setInforPieceColor(color);
 
       const moveData = {
         eventTime: new Date().toISOString(),
@@ -93,7 +133,7 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
         team,
         type
       };
-
+      
       //moveData.from = moveData.to
       
       sendMoveData(moveData); // Send move data to the server
