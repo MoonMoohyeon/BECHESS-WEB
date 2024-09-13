@@ -8,11 +8,11 @@ import "./App.css";
 const App = () => {
   const client = useRef({});
   const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
-  const [sessionId, setSessionId] = useState(null); // sessionId를 저장할 상태 변수
 
   /*타이머*/
   const initialSeconds = 3; //초기 시간 설정
   const [seconds, setSeconds] = useState(0);
+  const [timeOwner, setTimeOwner] = useState("w");
 
   /*보드 반전(방향 상태) 관리*/
   const [isReversed, setIsReversed] = useState(false);
@@ -30,7 +30,7 @@ const App = () => {
   /*보드를 리셋하는데 사용할 변수*/
   const [resetBoardFlag, setResetBoardFlag] = useState(false);
   /*보드 상태 관리*/
-  //const [boardState, setBoardState] = useState(null);
+  const [boardState, setBoardState] = useState("");
 
   const connect = () => {
     client.current = new StompJs.Client({
@@ -42,10 +42,9 @@ const App = () => {
       onConnect: () => {
         console.log("onConnect 실행됨...");
         subscribe();
-        subscribeuser();
         client.current.publish({
           destination: `/app/join`,
-          body: "Hello world",
+          body: "Web",
         });
       },
       onStompError: (frame) => {
@@ -65,28 +64,12 @@ const App = () => {
     return subscription;
   };
 
-  const subscribeuser = () => {
-    if (sessionId) {
-      const subscription = client.current.subscribe(
-        `/user/${sessionId}/topic/message`,
-        msg_callback
-      );
-      return subscription;
-    }
-  };
-
   /*broker 가 client 한테 메시지 전송할때마다, 트리거되는 콜백 함수.*/
   const msg_callback = (message) => {
     if (message.body) {
       console.log("받아온 메시지 : " + message.body);
       const action = message.body.split("\n");
       //console.log(action[0])
-
-      // sessionId가 포함된 메시지를 받으면 세션 ID를 저장
-      if (action[0] === "sessionId") {
-        setSessionId(action[1]); // sessionId 저장
-        console.log("세션 ID 저장됨: " + action[1]);
-      }
 
       // gameStart 메시지를 받으면 게임 시작 상태 업데이트 + 타이머 실행
       if (action[0] === "gameStart") {
@@ -98,10 +81,9 @@ const App = () => {
 
       // validMove 메시지를 받으면 보드상태 업데이트 + 타이머 실행
       else if (action[0] === "validMove") {
+        setBoardState(action[1]);
         setValidMoveFlag(true); // 유효한 이동 플래그
-        for (let i = 1; i <= 8; i++) {
-          console.log(action[i]);
-        }
+        console.log(action[1]);
         console.log("validMove!");
         setSeconds(initialSeconds);
 
@@ -114,7 +96,8 @@ const App = () => {
         setInvalidMoveMessage("잘못된 이동입니다."); // 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       } else {
-        /*!!!!!!*/
+
+      /*!!!!!!*/
         return 0;
       }
     } else {
@@ -160,15 +143,22 @@ const App = () => {
       //메시지 보내기
       client.current.publish({
         destination: "/app/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
-        body: "Time is up!", //전송할 메시지 내용
+        body: timeOwner, //전송할 메시지 내용
       });
-      console.log("timeUp 메시지를 성공적으로 전송했습니다.");
+      console.log(
+        "TimeOwner:" + timeOwner + " 메시지를 성공적으로 전송했습니다."
+      );
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
   };
   useEffect(() => {
     if (seconds === 0) {
+      if (timeOwner == "w") {
+        setTimeOwner("b");
+      } else {
+        setTimeOwner("w");
+      }
       sendTimeUpMessage();
     }
   }, [seconds]);
@@ -223,8 +213,7 @@ const App = () => {
               onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
               validMoveFlag={validMoveFlag}
               onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
-
-              //boardState={boardState} //유효한 움직임에 대해 보드 상태 수정
+              boardState={boardState} //유효한 움직임에 대해 보드 상태
             />
           </main>
 
