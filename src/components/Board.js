@@ -1,73 +1,90 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Square from './Square';
-import Piece from './Piece';
-import '../css/app.css';
+import React, { useEffect, useRef, useState } from "react";
+import Square from "./Square";
+import Piece from "./Piece";
+import "../css/app.css";
 
 const initialBoardSetup = {
-  '0,0': { type: 'r', color: 'w', position: '0,0' },
-  '1,0': { type: 'n', color: 'w', position: '1,0' },
-  '2,0': { type: 'b', color: 'w', position: '2,0' },
-  '3,0': { type: 'k', color: 'w', position: '3,0' },
-  '4,0': { type: 'q', color: 'w', position: '4,0' },
-  '5,0': { type: 'b', color: 'w', position: '5,0' },
-  '6,0': { type: 'n', color: 'w', position: '6,0' },
-  '7,0': { type: 'r', color: 'w', position: '7,0' },
-  '0,1': { type: 'p', color: 'w', position: '0,1' },
-  '1,1': { type: 'p', color: 'w', position: '1,1' },
-  '2,1': { type: 'p', color: 'w', position: '2,1' },
-  '3,1': { type: 'p', color: 'w', position: '3,1' },
-  '4,1': { type: 'p', color: 'w', position: '4,1' },
-  '5,1': { type: 'p', color: 'w', position: '5,1' },
-  '6,1': { type: 'p', color: 'w', position: '6,1' },
-  '7,1': { type: 'p', color: 'w', position: '7,1' },
-  '0,6': { type: 'p', color: 'b', position: '0,6' },
-  '1,6': { type: 'p', color: 'b', position: '1,6' },
-  '2,6': { type: 'p', color: 'b', position: '2,6' },
-  '3,6': { type: 'p', color: 'b', position: '3,6' },
-  '4,6': { type: 'p', color: 'b', position: '4,6' },
-  '5,6': { type: 'p', color: 'b', position: '5,6' },
-  '6,6': { type: 'p', color: 'b', position: '6,6' },
-  '7,6': { type: 'p', color: 'b', position: '7,6' },
-  '0,7': { type: 'r', color: 'b', position: '0,7' },
-  '1,7': { type: 'n', color: 'b', position: '1,7' },
-  '2,7': { type: 'b', color: 'b', position: '2,7' },
-  '3,7': { type: 'k', color: 'b', position: '3,7' },
-  '4,7': { type: 'q', color: 'b', position: '4,7' },
-  '5,7': { type: 'b', color: 'b', position: '5,7' },
-  '6,7': { type: 'n', color: 'b', position: '6,7' },
-  '7,7': { type: 'r', color: 'b', position: '7,7' },
+  "0,0": { type: "r", color: "w", position: "0,0" },
+  "1,0": { type: "n", color: "w", position: "1,0" },
+  "2,0": { type: "b", color: "w", position: "2,0" },
+  "3,0": { type: "k", color: "w", position: "3,0" },
+  "4,0": { type: "q", color: "w", position: "4,0" },
+  "5,0": { type: "b", color: "w", position: "5,0" },
+  "6,0": { type: "n", color: "w", position: "6,0" },
+  "7,0": { type: "r", color: "w", position: "7,0" },
+  "0,1": { type: "p", color: "w", position: "0,1" },
+  "1,1": { type: "p", color: "w", position: "1,1" },
+  "2,1": { type: "p", color: "w", position: "2,1" },
+  "3,1": { type: "p", color: "w", position: "3,1" },
+  "4,1": { type: "p", color: "w", position: "4,1" },
+  "5,1": { type: "p", color: "w", position: "5,1" },
+  "6,1": { type: "p", color: "w", position: "6,1" },
+  "7,1": { type: "p", color: "w", position: "7,1" },
+  "0,6": { type: "p", color: "b", position: "0,6" },
+  "1,6": { type: "p", color: "b", position: "1,6" },
+  "2,6": { type: "p", color: "b", position: "2,6" },
+  "3,6": { type: "p", color: "b", position: "3,6" },
+  "4,6": { type: "p", color: "b", position: "4,6" },
+  "5,6": { type: "p", color: "b", position: "5,6" },
+  "6,6": { type: "p", color: "b", position: "6,6" },
+  "7,6": { type: "p", color: "b", position: "7,6" },
+  "0,7": { type: "r", color: "b", position: "0,7" },
+  "1,7": { type: "n", color: "b", position: "1,7" },
+  "2,7": { type: "b", color: "b", position: "2,7" },
+  "3,7": { type: "k", color: "b", position: "3,7" },
+  "4,7": { type: "q", color: "b", position: "4,7" },
+  "5,7": { type: "b", color: "b", position: "5,7" },
+  "6,7": { type: "n", color: "b", position: "6,7" },
+  "7,7": { type: "r", color: "b", position: "7,7" },
 };
 
-const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, invalidMoveFlag, onInvalidMoveFlagComplete, validMoveFlag, onValidMoveFlagComplete, boardState}) => {
+const Board = ({
+  sendMoveData,
+  isReversed,
+  resetBoardFlag,
+  onResetComplete,
+  invalidMoveFlag,
+  onInvalidMoveFlagComplete,
+  validMoveFlag,
+  onValidMoveFlagComplete,
+  boardState,
+}) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
   //const [timeOwner, setTimeOwner] = useState('w');
   //이전 보드 상태 저장
-  const prevBoard = useRef(initialBoardSetup)
+  const prevBoard = useRef(initialBoardSetup);
   //const upDatedBoard = useRef(initialBoardSetup)
 
-  useEffect(() =>{
-    if(resetBoardFlag){
+  useEffect(() => {
+    if (resetBoardFlag) {
       //보드 초기화
       setBoard(initialBoardSetup);
       //보드 초기화를 완료했음을 알림
       onResetComplete();
     }
-    if(invalidMoveFlag){
+    if (invalidMoveFlag) {
       setBoard(prevBoard.current); // 이전 보드 상태로 복구
       onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
     }
-    if(validMoveFlag){
+    if (validMoveFlag) {
       const pieceInform = boardState.split(" "); //기물 정보
       console.log(pieceInform[1]);
-      
+
       const from = pieceInform[2];
       const to = pieceInform[5];
       const type = pieceInform[11];
       const color = pieceInform[8];
       const position = to;
-      console.log("from, to, type, color, position:",from, to, type, color, position);
+      console.log(
+        "from, to, type, color, position:",
+        from,
+        to,
+        type,
+        color,
+        position
+      );
 
       const team = color;
       // if(color == 'w'){
@@ -77,28 +94,28 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
       //   setTimeOwner('w');
       // }
 
-      const upDatedBoard = { ...board};
+      const upDatedBoard = { ...board };
       upDatedBoard[from] = null;
       upDatedBoard[to] = { type: type, color: color, position: position };
 
-      console.log("upDatedBoard.current[key]\n",upDatedBoard[to]);
+      console.log("upDatedBoard.current[key]\n", upDatedBoard[to]);
 
       setBoard(upDatedBoard);
-      console.log("board:\n",board);
-      
+      console.log("board:\n", board);
+
       const moveData = {
         eventTime: new Date().toISOString(),
         from,
         to,
         color,
         team,
-        type
+        type,
       };
       sendMoveData(moveData);
-      
+
       onValidMoveFlagComplete();
     }
-  },[resetBoardFlag, invalidMoveFlag, validMoveFlag])
+  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag]);
 
   const handleDragStart = (e, piece, position) => {
     prevBoard.current = { ...board }; //기물을 옮기기 전 보드상태 저장
@@ -118,10 +135,10 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
       const from = draggedPiece.position;
       const to = draggedOverSquare;
       const color = draggedPiece.color;
-      const team = draggedPiece.color === 'w' ? 'White' : 'Black';
+      const team = draggedPiece.color === "w" ? "White" : "Black";
       const type = draggedPiece.type;
 
-      /*드래그 기물 정보 기록*/ 
+      /*드래그 기물 정보 기록*/
       //setInforPieceType(type);
       //setInforPieceColor(color);
 
@@ -131,11 +148,11 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
         to,
         color,
         team,
-        type
+        type,
       };
       
       //moveData.from = moveData.to
-      
+
       sendMoveData(moveData); // Send move data to the server
       draggedPiece.position = draggedOverSquare; // Update the piece's position
       setBoard(newBoard);
@@ -177,11 +194,7 @@ const Board = ({ sendMoveData, isReversed, resetBoardFlag, onResetComplete, inva
     squares.reverse();
   }
 
-  return (
-    <div className="board">
-      {squares}
-    </div>
-  );
+  return <div className="board">{squares}</div>;
 };
 
 export default Board;
