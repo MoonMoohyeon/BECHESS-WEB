@@ -14,17 +14,17 @@ const App = () => {
   const [seconds, setSeconds] = useState(0);
   const [timeOwner, setTimeOwner] = useState("w");
 
-  /*보드 반전(방향 상태) 관리*/
+  /*보드 상하좌우 반전 여부 관리*/
   const [isReversed, setIsReversed] = useState(false);
-  /*게임 시작 상태 관리*/
+  /*게임 시작 여부 관리*/
   const [gameStarted, setGameStarted] = useState(false);
 
-  /*유효하지 않은  기물 움직임 메시지 설정*/
+  /*유효하지 않은  기물을 움직일 때 보낼 메시지*/
   const [invalidMoveMessage, setInvalidMoveMessage] = useState("");
-  /*보드를 이전 상태로 돌리는데 사용할 변수*/
+  /*기물 움직임 잘못됨 여부를 나타냄*/
   const [invalidMoveFlag, setInvalidMoveFlag] = useState(false);
 
-  /*유효한 기물 움직임 Flag*/
+  /*기물 움직임 유효 여부를 나타냄*/
   const [validMoveFlag, setValidMoveFlag] = useState(false);
 
   /*보드를 리셋하는데 사용할 변수*/
@@ -95,13 +95,9 @@ const App = () => {
         setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
         setInvalidMoveMessage("잘못된 이동입니다."); // 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
-      } else {
-
-      /*!!!!!!*/
-        return 0;
-      }
+      } 
     } else {
-      console.log("메시지 is empty !!");
+      console.log("메시지 is empty...");
     }
   };
 
@@ -115,6 +111,8 @@ const App = () => {
     return () => disConnect();
   }, []);
 
+
+  // web 정보 전달를 서버로 전달
   const sendMoveData = (moveData) => {
     console.log(moveData);
     if (client.current.connected) {
@@ -126,7 +124,7 @@ const App = () => {
     }
   };
 
-  //timer useEfferct
+  // timer useEfferct
   useEffect(() => {
     if (seconds > 0) {
       const timer = setInterval(() => {
@@ -136,14 +134,14 @@ const App = () => {
     }
   }, [seconds]);
 
-  //seconds가 0이 되었을 때 서버로 메시지를 보내는 함수
+  // seconds가 0이 되었을 때 서버로 메시지를 보내는 함수
   const sendTimeUpMessage = () => {
-    //client가 연결 가능한지 확인
+    // client가 연결 가능한지 확인
     if (client.current.connected) {
-      //메시지 보내기
+      // 메시지 보내기
       client.current.publish({
         destination: "/app/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
-        body: timeOwner, //전송할 메시지 내용
+        body: timeOwner, // 전송할 메시지 내용
       });
       console.log(
         "TimeOwner:" + timeOwner + " 메시지를 성공적으로 전송했습니다."
@@ -163,14 +161,14 @@ const App = () => {
     }
   }, [seconds]);
 
-  //reset버튼 눌렀을 때 서버에 메시지를 보내는 함수
+  // reset버튼 눌렀을 때 서버에 메시지를 보내는 함수
   const resetMessage = () => {
-    //client가 연결 가능한지 확인
+    // client가 연결 가능한지 확인
     if (client.current.connected) {
-      //메시지 보내기
+      // 메시지 보내기
       client.current.publish({
         destination: "/app/reset", // 스프링 부트 컨트롤러의 엔드포인트
-        body: "reset!", //전송할 메시지 내용
+        body: "reset!", // 전송할 메시지 내용
       });
       console.log("reset 메시지를 성공적으로 전송했습니다.");
     } else {
@@ -183,6 +181,8 @@ const App = () => {
     }
   }, [resetBoardFlag]);
 
+
+  
   return (
     <div className="App">
       {!gameStarted ? (
@@ -197,7 +197,10 @@ const App = () => {
             >
               보드 반전
             </button>
-            <button className="button1" onClick={() => setResetBoardFlag(true)}>
+            <button 
+              className="button1" 
+              onClick={() => setResetBoardFlag(true)}
+            >
               보드 초기화
             </button>
           </header>
@@ -213,7 +216,7 @@ const App = () => {
               onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
               validMoveFlag={validMoveFlag}
               onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
-              boardState={boardState} //유효한 움직임에 대해 보드 상태
+              boardState={boardState} // 유효한 움직임에 대해 보드 상태
             />
           </main>
 

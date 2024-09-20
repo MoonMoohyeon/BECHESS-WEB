@@ -3,51 +3,31 @@
   width: 100vw;
   text-align: center;
 }
-/*
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-*/
-.timerText{
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 15px;
-}
-.button1{
-  margin: auto;
-  margin-left: 10px;
-  /* margin-top: auto;
-  margin-bottom: auto; */
-}
-.board{
-  margin:auto;
-  margin-left: 110px;
-}
-.error-message{
-  color: red;
-  font-weight: bold;
-  margin-top: 20px;
-}
-
+/*header*/
 .App-header {
   background-color: yellow;
 	width: 700px;
 	height: 100px;
 
   display: flex;
-  /* flex-direction: row; */
 
   margin-top: 3%;
   margin-left: auto;
   margin-right: auto;
 }
+.timerText{
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 15px;
+}
+
+.button1{ 
+  margin: auto;
+  margin-left: 10px;
+}
+
+/*main*/
 .App-main{
   background-color:blue;
 	width: 700px;
@@ -55,23 +35,20 @@
   margin-left: auto;
   margin-right: auto;
 }
+.board{
+  margin:auto;
+  margin-left: 110px;
+}
+
+/*footer*/
 .App-footer {
   background-color: green;
 	width: 700px;
 	height: 70px;
   margin: auto;
 }
-/*
-.App-link {
-  color: #61dafb;
+.error-message{
+  color: red;
+  font-weight: bold;
+  margin-top: 20px;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-*/

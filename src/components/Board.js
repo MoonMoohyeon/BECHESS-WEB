@@ -3,6 +3,7 @@ import Square from "./Square";
 import Piece from "./Piece";
 import "../css/app.css";
 
+// 시작 보드 상태
 const initialBoardSetup = {
   "0,0": { type: "r", color: "w", position: "0,0" },
   "1,0": { type: "n", color: "w", position: "1,0" },
@@ -39,23 +40,21 @@ const initialBoardSetup = {
 };
 
 const Board = ({
-  sendMoveData,
-  isReversed,
-  resetBoardFlag,
-  onResetComplete,
-  invalidMoveFlag,
-  onInvalidMoveFlagComplete,
-  validMoveFlag,
-  onValidMoveFlagComplete,
-  boardState,
+  sendMoveData,                     // 서버에 보낼 데이터
+  isReversed,                       // 보드 상하좌우 반전에 사용될 변수
+  resetBoardFlag,                   // 보드 초기화에 사용될 변수
+  onResetComplete,                  // 보드가 초기화 됨을 확인할 때 사용할 변수
+  invalidMoveFlag,                  // 잘못된 움직임 여부를 나타내는 플래그
+  onInvalidMoveFlagComplete,        // 잘못된 움직임 수정 완료됨을 확인할 때 사용할 변수
+  validMoveFlag,                    // 유효한 움직임 여부를 나타내는 플래그
+  onValidMoveFlagComplete,          // 유효한 움직임 완료됨을 확인할 때 사용할 변수
+  boardState,                       // 유효한 움직임 이후 보드 정보를 갖고 있는 변수
 }) => {
   const [board, setBoard] = useState(initialBoardSetup);
   const [draggedPiece, setDraggedPiece] = useState(null);
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);
-  //const [timeOwner, setTimeOwner] = useState('w');
   //이전 보드 상태 저장
   const prevBoard = useRef(initialBoardSetup);
-  //const upDatedBoard = useRef(initialBoardSetup)
 
   useEffect(() => {
     if (resetBoardFlag) {
@@ -70,38 +69,30 @@ const Board = ({
     }
     if (validMoveFlag) {
       const pieceInform = boardState.split(" "); //기물 정보
-      console.log(pieceInform[1]);
 
       const from = pieceInform[2];
       const to = pieceInform[5];
       const type = pieceInform[11];
       const color = pieceInform[8];
       const position = to;
+      
       console.log(
-        "from, to, type, color, position:",
-        from,
-        to,
-        type,
-        color,
-        position
+        "from:", from, "\n",
+        "to:", to, "\n",
+        "type", type, "\n",
+        "cocor", color, "\n", 
+        "position", position, "\n"
       );
 
       const team = color;
-      // if(color == 'w'){
-      //   setTimeOwner('b');
-      // }
-      // else{
-      //   setTimeOwner('w');
-      // }
-
       const upDatedBoard = { ...board };
       upDatedBoard[from] = null;
       upDatedBoard[to] = { type: type, color: color, position: position };
 
-      console.log("upDatedBoard.current[key]\n", upDatedBoard[to]);
+      //console.log("upDatedBoard\n", upDatedBoard[to]);
 
       setBoard(upDatedBoard);
-      console.log("board:\n", board);
+      //console.log("board:\n", board);
 
       const moveData = {
         eventTime: new Date().toISOString(),
@@ -138,10 +129,6 @@ const Board = ({
       const team = draggedPiece.color === "w" ? "White" : "Black";
       const type = draggedPiece.type;
 
-      /*드래그 기물 정보 기록*/
-      //setInforPieceType(type);
-      //setInforPieceColor(color);
-
       const moveData = {
         eventTime: new Date().toISOString(),
         from,
@@ -150,8 +137,6 @@ const Board = ({
         team,
         type,
       };
-      
-      //moveData.from = moveData.to
 
       sendMoveData(moveData); // Send move data to the server
       draggedPiece.position = draggedOverSquare; // Update the piece's position
