@@ -50,9 +50,9 @@ const Board = ({
   onValidMoveFlagComplete,          // 유효한 움직임 완료됨을 확인할 때 사용할 변수
   boardState,                       // 유효한 움직임 이후 보드 정보를 갖고 있는 변수
 }) => {
-  const [board, setBoard] = useState(initialBoardSetup);
-  const [draggedPiece, setDraggedPiece] = useState(null);
-  const [draggedOverSquare, setDraggedOverSquare] = useState(null);
+  const [board, setBoard] = useState(initialBoardSetup);             // 현재 보드 상태를 나타냄
+  const [draggedPiece, setDraggedPiece] = useState(null);            // 마우스로 드래그한 기물 정보 저장
+  const [draggedOverSquare, setDraggedOverSquare] = useState(null);  // 사용자가 드래그한 기물을 놓을(드롭할) 위치를 저장
   //이전 보드 상태 저장
   const prevBoard = useRef(initialBoardSetup);
 
@@ -68,7 +68,7 @@ const Board = ({
       onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
     }
     if (validMoveFlag) {
-      const pieceInform = boardState.split(" "); //기물 정보
+      const pieceInform = boardState.split(" ");
 
       const from = pieceInform[2];
       const to = pieceInform[5];

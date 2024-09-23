@@ -10,7 +10,7 @@ const App = () => {
   const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
 
   /*타이머*/
-  const initialSeconds = 3; //초기 시간 설정
+  const initialSeconds = 30; //초기 시간 설정
   const [seconds, setSeconds] = useState(0);
   const [timeOwner, setTimeOwner] = useState("w");
 
@@ -58,7 +58,7 @@ const App = () => {
 
   const subscribe = () => {
     const subscription = client.current.subscribe(
-      `/topic/message`,
+      `/topic/Web`,
       msg_callback
     );
     return subscription;
@@ -85,6 +85,11 @@ const App = () => {
         setValidMoveFlag(true); // 유효한 이동 플래그
         console.log(action[1]);
         console.log("validMove!");
+
+        //const pieceInform = action[0].split(" ");
+        //const color  = pieceInform[8];
+        
+
         setSeconds(initialSeconds);
 
         return 0;
