@@ -9,8 +9,11 @@ const App = () => {
   const client = useRef({});
   const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
 
+  const [mySetionID1, setMySectionID1] = useState("");
+  const [mySetionID2, setMySectionID2] = useState("");
+
   /*타이머*/
-  const initialSeconds = 30; //초기 시간 설정
+  const initialSeconds = 15; //초기 시간 설정
   const [seconds, setSeconds] = useState(0);
   const [timeOwner, setTimeOwner] = useState("w");
 
@@ -26,11 +29,12 @@ const App = () => {
 
   /*기물 움직임 유효 여부를 나타냄*/
   const [validMoveFlag, setValidMoveFlag] = useState(false);
-
   /*보드를 리셋하는데 사용할 변수*/
   const [resetBoardFlag, setResetBoardFlag] = useState(false);
   /*보드 상태 관리*/
   const [boardState, setBoardState] = useState("");
+
+
 
   const connect = () => {
     client.current = new StompJs.Client({
@@ -69,7 +73,19 @@ const App = () => {
     if (message.body) {
       console.log("받아온 메시지 : " + message.body);
       const action = message.body.split("\n");
+      const action2 = message.body.split(" ");
       //console.log(action[0])
+
+      if(mySetionID1 == " "){
+        if (action2[0] == "sessionID"){
+          setMySectionID1(action2[2]+" "+action2[5]);
+        }
+      }
+      else{
+        if (action2[0] == "sessionID"){
+          setMySectionID2(action2[2]+" "+action2[5]);
+        }
+      }
 
       // gameStart 메시지를 받으면 게임 시작 상태 업데이트 + 타이머 실행
       if (action[0] === "gameStart") {
@@ -156,7 +172,7 @@ const App = () => {
     }
   };
   useEffect(() => {
-    if (seconds === 0) {
+    if (seconds === 0 || validMoveFlag == true) {
       if (timeOwner == "w") {
         setTimeOwner("b");
       } else {
@@ -164,7 +180,7 @@ const App = () => {
       }
       sendTimeUpMessage();
     }
-  }, [seconds]);
+  }, [seconds, validMoveFlag]);
 
   // reset버튼 눌렀을 때 서버에 메시지를 보내는 함수
   const resetMessage = () => {
