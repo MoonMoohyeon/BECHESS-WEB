@@ -84,7 +84,7 @@ const Board = ({
         "position", position, "\n"
       );
 
-      const team = color;
+      //const team = color;
       const upDatedBoard = { ...board };
       upDatedBoard[from] = null;
       upDatedBoard[to] = { type: type, color: color, position: position };
@@ -93,7 +93,7 @@ const Board = ({
 
       setBoard(upDatedBoard);
       //console.log("board:\n", board);
-
+      /*
       const moveData = {
         eventTime: new Date().toISOString(),
         from,
@@ -103,7 +103,7 @@ const Board = ({
         type,
       };
       sendMoveData(moveData);
-
+      */
       onValidMoveFlagComplete();
     }
   }, [resetBoardFlag, invalidMoveFlag, validMoveFlag]);

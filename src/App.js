@@ -76,7 +76,7 @@ const App = () => {
       const action2 = message.body.split(" ");
       //console.log(action[0])
 
-      if(mySetionID1 == " "){
+      if(mySetionID1 == ""){
         if (action2[0] == "sessionID"){
           setMySectionID1(action2[2]+" "+action2[5]);
         }
