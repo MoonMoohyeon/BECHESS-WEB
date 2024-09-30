@@ -133,7 +133,7 @@ const App = () => {
   }, []);
 
 
-  // web 정보 전달를 서버로 전달
+  // web 정보를 서버로 전달
   const sendMoveData = (moveData) => {
     console.log(moveData);
     if (client.current.connected) {
