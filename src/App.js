@@ -34,8 +34,6 @@ const App = () => {
   /*보드 상태 관리*/
   const [boardState, setBoardState] = useState("");
 
-
-
   const connect = () => {
     client.current = new StompJs.Client({
       brokerURL: "ws://localhost:9090/chess", // Updated WebSocket URL
@@ -47,7 +45,7 @@ const App = () => {
         console.log("onConnect 실행됨...");
         subscribe();
         client.current.publish({
-          destination: `/app/join`,
+          destination: `/app/Web/join`,
           body: "Web",
         });
       },
@@ -61,10 +59,7 @@ const App = () => {
   };
 
   const subscribe = () => {
-    const subscription = client.current.subscribe(
-      `/topic/Web`,
-      msg_callback
-    );
+    const subscription = client.current.subscribe(`/topic/Web`, msg_callback);
     return subscription;
   };
 
@@ -76,14 +71,13 @@ const App = () => {
       const action2 = message.body.split(" ");
       //console.log(action[0])
 
-      if(mySetionID1 == ""){
-        if (action2[0] == "sessionID"){
-          setMySectionID1(action2[2]+" "+action2[5]);
+      if (mySetionID1 == "") {
+        if (action2[0] == "sessionID") {
+          setMySectionID1(action2[2] + " " + action2[5]);
         }
-      }
-      else{
-        if (action2[0] == "sessionID"){
-          setMySectionID2(action2[2]+" "+action2[5]);
+      } else {
+        if (action2[0] == "sessionID") {
+          setMySectionID2(action2[2] + " " + action2[5]);
         }
       }
 
@@ -104,7 +98,6 @@ const App = () => {
 
         //const pieceInform = action[0].split(" ");
         //const color  = pieceInform[8];
-        
 
         setSeconds(initialSeconds);
 
@@ -116,7 +109,7 @@ const App = () => {
         setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
         setInvalidMoveMessage("잘못된 이동입니다."); // 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
-      } 
+      }
     } else {
       console.log("메시지 is empty...");
     }
@@ -132,13 +125,12 @@ const App = () => {
     return () => disConnect();
   }, []);
 
-
   // web 정보 전달를 서버로 전달
   const sendMoveData = (moveData) => {
     console.log(moveData);
     if (client.current.connected) {
       client.current.publish({
-        destination: "/app/moveWEB",
+        destination: "/app/Web/move",
         body: JSON.stringify(moveData),
       });
       moveSoundRef.current.play(); // Play the move sound
@@ -161,7 +153,7 @@ const App = () => {
     if (client.current.connected) {
       // 메시지 보내기
       client.current.publish({
-        destination: "/app/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
+        destination: "/app/Web/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
         body: timeOwner, // 전송할 메시지 내용
       });
       console.log(
@@ -188,7 +180,7 @@ const App = () => {
     if (client.current.connected) {
       // 메시지 보내기
       client.current.publish({
-        destination: "/app/reset", // 스프링 부트 컨트롤러의 엔드포인트
+        destination: "/app/Web/reset", // 스프링 부트 컨트롤러의 엔드포인트
         body: "reset!", // 전송할 메시지 내용
       });
       console.log("reset 메시지를 성공적으로 전송했습니다.");
@@ -202,8 +194,6 @@ const App = () => {
     }
   }, [resetBoardFlag]);
 
-
-  
   return (
     <div className="App">
       {!gameStarted ? (
@@ -218,10 +208,7 @@ const App = () => {
             >
               보드 반전
             </button>
-            <button 
-              className="button1" 
-              onClick={() => setResetBoardFlag(true)}
-            >
+            <button className="button1" onClick={() => setResetBoardFlag(true)}>
               보드 초기화
             </button>
           </header>
