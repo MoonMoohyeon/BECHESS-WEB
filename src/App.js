@@ -35,7 +35,7 @@ const App = () => {
   const [boardState, setBoardState] = useState("");
 
 
-
+  /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
   const connect = () => {
     client.current = new StompJs.Client({
       brokerURL: "ws://localhost:9090/chess", // Updated WebSocket URL
@@ -47,7 +47,7 @@ const App = () => {
         console.log("onConnect 실행됨...");
         subscribe();
         client.current.publish({
-          destination: `/app/join`,
+          destination: `/app/Web/join`,
           body: "Web",
         });
       },
@@ -60,13 +60,28 @@ const App = () => {
     client.current.activate();
   };
 
+
+  /*STOMP 클라이언트를 사용하여 서버로부터 메시지를 구독*/
   const subscribe = () => {
-    const subscription = client.current.subscribe(
-      `/topic/Web`,
-      msg_callback
-    );
+    const subscription = client.current.subscribe(`/topic/Web`, msg_callback);
     return subscription;
   };
+
+
+  /*STOMP 클라이언트를 사용하여 현재 웹소켓 연결을 끊기*/
+  const disConnect = () => {
+    if (client.current.connected) client.current.deactivate();
+  };
+
+
+  /*컴포넌트가 처음 마운트될 시 STOMP 클라이언트를 서버에 연결*/
+  /*(언마운트 될 시 서버와 연결을 끊음)*/
+  useEffect(() => {
+    console.log("클라이언트 연결됨", client.current.connected);
+    connect();
+    return () => disConnect();
+  }, []);
+
 
   /*broker 가 client 한테 메시지 전송할때마다, 트리거되는 콜백 함수.*/
   const msg_callback = (message) => {
@@ -76,14 +91,13 @@ const App = () => {
       const action2 = message.body.split(" ");
       //console.log(action[0])
 
-      if(mySetionID1 == ""){
-        if (action2[0] == "sessionID"){
-          setMySectionID1(action2[2]+" "+action2[5]);
+      if (mySetionID1 === "") {
+        if (action2[0] === "sessionID") {
+          setMySectionID1(action2[2] + " " + action2[5]);
         }
-      }
-      else{
-        if (action2[0] == "sessionID"){
-          setMySectionID2(action2[2]+" "+action2[5]);
+      } else {
+        if (action2[0] === "sessionID") {
+          setMySectionID2(action2[2] + " " + action2[5]);
         }
       }
 
@@ -104,7 +118,6 @@ const App = () => {
 
         //const pieceInform = action[0].split(" ");
         //const color  = pieceInform[8];
-        
 
         setSeconds(initialSeconds);
 
@@ -116,21 +129,11 @@ const App = () => {
         setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
         setInvalidMoveMessage("잘못된 이동입니다."); // 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
-      } 
+      }
     } else {
       console.log("메시지 is empty...");
     }
   };
-
-  const disConnect = () => {
-    if (client.current.connected) client.current.deactivate();
-  };
-
-  useEffect(() => {
-    console.log("클라이언트 연결됨", client.current.connected);
-    connect();
-    return () => disConnect();
-  }, []);
 
 
   // web 정보를 서버로 전달
@@ -138,15 +141,18 @@ const App = () => {
     console.log(moveData);
     if (client.current.connected) {
       client.current.publish({
-        destination: "/app/moveWEB",
+        destination: "/app/Web/move",
         body: JSON.stringify(moveData),
       });
       moveSoundRef.current.play(); // Play the move sound
     }
   };
 
-  // timer useEfferct
+  
+  /*타이머 처리 부분*/
+  // 타이머 useEfferct
   useEffect(() => {
+    // seconds가 0이 아닌 경우 1초씩 감소시킴
     if (seconds > 0) {
       const timer = setInterval(() => {
         setSeconds(seconds - 1);
@@ -154,14 +160,13 @@ const App = () => {
       return () => clearInterval(timer);
     }
   }, [seconds]);
-
   // seconds가 0이 되었을 때 서버로 메시지를 보내는 함수
   const sendTimeUpMessage = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
       // 메시지 보내기
       client.current.publish({
-        destination: "/app/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
+        destination: "/app/Web/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
         body: timeOwner, // 전송할 메시지 내용
       });
       console.log(
@@ -171,9 +176,10 @@ const App = () => {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
   };
+  // seconds가 0이거나 유효한 움직임을 수행한 경우 -> 다음 차례로 넘어감
   useEffect(() => {
-    if (seconds === 0 || validMoveFlag == true) {
-      if (timeOwner == "w") {
+    if (seconds === 0 || validMoveFlag === true) {
+      if (timeOwner === "w") {
         setTimeOwner("b");
       } else {
         setTimeOwner("w");
@@ -182,13 +188,15 @@ const App = () => {
     }
   }, [seconds, validMoveFlag]);
 
+
+  /*리셋 버튼 관련 부분*/
   // reset버튼 눌렀을 때 서버에 메시지를 보내는 함수
   const resetMessage = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
       // 메시지 보내기
       client.current.publish({
-        destination: "/app/reset", // 스프링 부트 컨트롤러의 엔드포인트
+        destination: "/app/Web/reset", // 스프링 부트 컨트롤러의 엔드포인트
         body: "reset!", // 전송할 메시지 내용
       });
       console.log("reset 메시지를 성공적으로 전송했습니다.");
@@ -203,7 +211,6 @@ const App = () => {
   }, [resetBoardFlag]);
 
 
-  
   return (
     <div className="App">
       {!gameStarted ? (
@@ -218,10 +225,7 @@ const App = () => {
             >
               보드 반전
             </button>
-            <button 
-              className="button1" 
-              onClick={() => setResetBoardFlag(true)}
-            >
+            <button className="button1" onClick={() => setResetBoardFlag(true)}>
               보드 초기화
             </button>
           </header>
