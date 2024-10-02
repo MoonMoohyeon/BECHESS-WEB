@@ -8,14 +8,18 @@ import "./App.css";
 const App = () => {
   const client = useRef({});
   const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
-
+  
   const [mySetionID1, setMySectionID1] = useState("");
   const [mySetionID2, setMySectionID2] = useState("");
+  
 
-  /*타이머*/
-  const initialSeconds = 15; //초기 시간 설정
-  const [seconds, setSeconds] = useState(0);
-  const [timeOwner, setTimeOwner] = useState("w");
+  /*팀 선택*/
+  const [selectTeam, setSelectTeam] = useState("");
+
+  /*타이머 관련 변수*/
+  const initialSeconds = 15; // 초기 시간 설정
+  const [seconds, setSeconds] = useState(0); // 현재 시간
+  const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
 
   /*보드 상하좌우 반전 여부 관리*/
   const [isReversed, setIsReversed] = useState(false);
@@ -136,7 +140,7 @@ const App = () => {
   };
 
 
-  // web 정보를 서버로 전달
+  /*web 정보를 서버로 전달*/
   const sendMoveData = (moveData) => {
     console.log(moveData);
     if (client.current.connected) {
@@ -211,10 +215,40 @@ const App = () => {
   }, [resetBoardFlag]);
 
 
+  /*흑, 백 팀 선택*/
+  //팀 선택 후 결과를 서버로 보냄
+  const completeChooseTeam = () => {
+    // client가 연결 가능한지 확인
+    if (client.current.connected) {
+      // 메시지 보내기
+      client.current.publish({
+        destination: "/app/Web/team", // 스프링 부트 컨트롤러의 엔드포인트
+        body: selectTeam, // 전송할 메시지 내용
+      });
+      console.log("selectTeam:" + selectTeam + " 메시지를 성공적으로 전송했습니다.");
+    } else {
+      console.log("WebSocket 연결이 되어 있지 않습니다.");
+    }
+  };
+  useEffect(() => {
+    if (selectTeam !== "") {
+      completeChooseTeam();
+    }
+  }, [selectTeam]);
+
+
   return (
     <div className="App">
-      {!gameStarted ? (
-        <h3>대기 중... 게임이 곧 시작됩니다.</h3>
+      {!gameStarted || selectTeam === ""? ( // 게임 대기 또는 팀 선택 전인 경우
+        <>
+          <h3>대기 중... 게임이 곧 시작됩니다.</h3>
+          <button className="button1" onClick={() => setSelectTeam("b")}>
+            흑
+          </button>
+          <button className="button1" onClick={() => setSelectTeam("w")}>
+            백
+          </button>
+        </>
       ) : (
         <>
           <header className="App-header">
