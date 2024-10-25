@@ -9,8 +9,8 @@ const App = () => {
   const client = useRef({});
   const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
   
-  const [mySetionID1, setMySectionID1] = useState("");
-  const [mySetionID2, setMySectionID2] = useState("");
+  //const [mySetionID1, setMySectionID1] = useState("");
+  //const [mySetionID2, setMySectionID2] = useState("");
   
 
   /*팀 선택*/
@@ -92,9 +92,9 @@ const App = () => {
     if (message.body) {
       console.log("받아온 메시지 : " + message.body);
       const action = message.body.split("\n");
-      const action2 = message.body.split(" ");
+      //const action2 = message.body.split(" ");
       //console.log(action[0])
-
+      /*
       if (mySetionID1 === "") {
         if (action2[0] === "sessionID") {
           setMySectionID1(action2[2] + " " + action2[5]);
@@ -104,7 +104,7 @@ const App = () => {
           setMySectionID2(action2[2] + " " + action2[5]);
         }
       }
-
+      */
       // gameStart 메시지를 받으면 게임 시작 상태 업데이트 + 타이머 실행
       if (action[0] === "gameStart") {
         setGameStarted(true);
@@ -276,6 +276,7 @@ const App = () => {
               validMoveFlag={validMoveFlag}
               onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
               boardState={boardState} // 유효한 움직임에 대해 보드 상태
+              selectTeam={selectTeam} // 팀 색상
             />
           </main>
 

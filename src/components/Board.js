@@ -49,12 +49,15 @@ const Board = ({
   validMoveFlag,                    // 유효한 움직임 여부를 나타내는 플래그
   onValidMoveFlagComplete,          // 유효한 움직임 완료됨을 확인할 때 사용할 변수
   boardState,                       // 유효한 움직임 이후 보드 정보를 갖고 있는 변수
+  selectTeam                        // 팀 색상
 }) => {
   const [board, setBoard] = useState(initialBoardSetup);             // 현재 보드 상태를 나타냄
   const [draggedPiece, setDraggedPiece] = useState(null);            // 마우스로 드래그한 기물 정보 저장
   const [draggedOverSquare, setDraggedOverSquare] = useState(null);  // 사용자가 드래그한 기물을 놓을(드롭할) 위치를 저장
   //이전 보드 상태 저장
   const prevBoard = useRef(initialBoardSetup);
+
+  const [movePieceColor, setMovePieceColor] = useState("");
 
   useEffect(() => {
     if (resetBoardFlag) {
@@ -63,7 +66,7 @@ const Board = ({
       //보드 초기화를 완료했음을 알림
       onResetComplete();
     }
-    if (invalidMoveFlag) {
+    if (invalidMoveFlag && (movePieceColor === selectTeam)) {
       setBoard(prevBoard.current); // 이전 보드 상태로 복구
       onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
     }
@@ -109,6 +112,15 @@ const Board = ({
   }, [resetBoardFlag, invalidMoveFlag, validMoveFlag]);
 
   const handleDragStart = (e, piece, position) => {
+    // 자신 팀 기물만 드래그 할 수 있음
+    setMovePieceColor(piece.color);
+    if (
+      (selectTeam === "b" && piece.color === "w") ||
+      (selectTeam === "w" && piece.color === "b")
+    ) {
+      return;
+    }
+
     prevBoard.current = { ...board }; //기물을 옮기기 전 보드상태 저장
     setDraggedPiece({ ...piece, position });
   };
