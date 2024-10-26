@@ -16,6 +16,11 @@
   margin-left: auto;
   margin-right: auto;
 }
+.turn{
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 15px;
+}
 .timerText{
   margin-top: auto;
   margin-bottom: auto;

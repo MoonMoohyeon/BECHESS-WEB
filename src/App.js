@@ -108,7 +108,7 @@ const App = () => {
       else if (action[0] === "invalidMove") {
         setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
         console.log(action[1]);
-        console.log("validMove!");
+        console.log("invalidMove!");
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       }
@@ -236,6 +236,7 @@ const App = () => {
       ) : (
         <>
           <header className="App-header">
+            <h3 className="turn">{timeOwner} 차례</h3>
             <h3 className="timerText">남은시간 : {seconds}초</h3>
             <button
               className="button1"
