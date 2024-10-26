@@ -9,16 +9,12 @@ const App = () => {
   const client = useRef({});
   const moveSoundRef = useRef(new Audio(moveSound)); // Create an audio instance
   
-  //const [mySetionID1, setMySectionID1] = useState("");
-  //const [mySetionID2, setMySectionID2] = useState("");
-  
-
   /*팀 선택*/
   const [selectTeam, setSelectTeam] = useState("");
 
   /*타이머 관련 변수*/
   const initialSeconds = 15; // 초기 시간 설정
-  const [seconds, setSeconds] = useState(0); // 현재 시간
+  const [seconds, setSeconds] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
 
   /*보드 상하좌우 반전 여부 관리*/
@@ -92,46 +88,28 @@ const App = () => {
     if (message.body) {
       console.log("받아온 메시지 : " + message.body);
       const action = message.body.split("\n");
-      //const action2 = message.body.split(" ");
-      //console.log(action[0])
-      /*
-      if (mySetionID1 === "") {
-        if (action2[0] === "sessionID") {
-          setMySectionID1(action2[2] + " " + action2[5]);
-        }
-      } else {
-        if (action2[0] === "sessionID") {
-          setMySectionID2(action2[2] + " " + action2[5]);
-        }
-      }
-      */
-      // gameStart 메시지를 받으면 게임 시작 상태 업데이트 + 타이머 실행
+      // gameStart 메시지를 받으면 게임 시작 상태로 업데이트
       if (action[0] === "gameStart") {
         setGameStarted(true);
-        setSeconds(initialSeconds);
         console.log("완료");
         return 0;
       }
 
-      // validMove 메시지를 받으면 보드상태 업데이트 + 타이머 실행
+      // validMove 메시지를 받으면 보드상태 업데이트
       else if (action[0] === "validMove") {
-        setBoardState(action[1]);
+        setBoardState(action[1]); // 옮긴 기물 위치와 색상을 웹에서 서버로 전달
         setValidMoveFlag(true); // 유효한 이동 플래그
         console.log(action[1]);
         console.log("validMove!");
-
-        //const pieceInform = action[0].split(" ");
-        //const color  = pieceInform[8];
-
-        setSeconds(initialSeconds);
-
         return 0;
       }
 
       // 기물을 잘못 이동했을 경우 에러 메시지 설정
       else if (action[0] === "invalidMove") {
         setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
-        setInvalidMoveMessage("잘못된 이동입니다."); // 에러 메시지 설정
+        console.log(action[1]);
+        console.log("validMove!");
+        setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       }
     } else {
@@ -156,15 +134,32 @@ const App = () => {
   /*타이머 처리 부분*/
   // 타이머 useEfferct
   useEffect(() => {
-    // seconds가 0이 아닌 경우 1초씩 감소시킴
-    if (seconds > 0) {
+    // gameStart 상태이고 seconds가 0이 아닌 경우 1초씩 감소시킴
+    if (gameStarted === true && seconds > 0) {
       const timer = setInterval(() => {
         setSeconds(seconds - 1);
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [seconds]);
-  // seconds가 0이 되었을 때 서버로 메시지를 보내는 함수
+  }, [gameStarted, seconds]);
+  // seconds가 0이 되었거나 유효한 움직임을 수행한 경우, 서버로 메시지를 보내는 함수
+  useEffect(() => {
+    if (seconds === 0 || validMoveFlag === true) {
+      if (timeOwner === "w") {
+        setTimeOwner("b");
+      } else {
+        setTimeOwner("w");
+      }
+
+      //턴이 끝난 팀쪽에서 다음 차례 색상을 알려줌
+      if(timeOwner !== selectTeam){
+        sendTimeUpMessage();        
+      }
+
+      //seconds 초기화
+      setSeconds(initialSeconds);
+    }
+  }, [seconds, validMoveFlag]);
   const sendTimeUpMessage = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
@@ -174,23 +169,12 @@ const App = () => {
         body: timeOwner, // 전송할 메시지 내용
       });
       console.log(
-        "TimeOwner:" + timeOwner + " 메시지를 성공적으로 전송했습니다."
+        "current TimeOwner:" + timeOwner + " 메시지를 성공적으로 전송했습니다."
       );
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
   };
-  // seconds가 0이거나 유효한 움직임을 수행한 경우 -> 다음 차례로 넘어감
-  useEffect(() => {
-    if (seconds === 0 || validMoveFlag === true) {
-      if (timeOwner === "w") {
-        setTimeOwner("b");
-      } else {
-        setTimeOwner("w");
-      }
-      sendTimeUpMessage();
-    }
-  }, [seconds, validMoveFlag]);
 
 
   /*리셋 버튼 관련 부분*/
@@ -217,6 +201,11 @@ const App = () => {
 
   /*흑, 백 팀 선택*/
   //팀 선택 후 결과를 서버로 보냄
+  useEffect(() => {
+    if (selectTeam !== "") {
+      completeChooseTeam();
+    }
+  }, [selectTeam]);
   const completeChooseTeam = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
@@ -230,11 +219,6 @@ const App = () => {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
   };
-  useEffect(() => {
-    if (selectTeam !== "") {
-      completeChooseTeam();
-    }
-  }, [selectTeam]);
 
 
   return (
@@ -277,6 +261,7 @@ const App = () => {
               onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
               boardState={boardState} // 유효한 움직임에 대해 보드 상태
               selectTeam={selectTeam} // 팀 색상
+              timeOwner={timeOwner} // 현재 턴인 색상
             />
           </main>
 
