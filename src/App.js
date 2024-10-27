@@ -185,9 +185,9 @@ const App = () => {
         sendTimeUpMessage(); // 턴 종료 메시지 전송
         setSecondsBlack(initialSeconds); // 타이머 초기화
       } else if (validMoveFlag) {
-      // 유효한 움직임이 발생했을 때 한 번만 sendTimeUpMessage를 호출하고 플래그를 초기화합니다.
-      sendTimeUpMessage();
-      setValidMoveFlag(false);
+        // 유효한 움직임이 발생했을 때 한 번만 sendTimeUpMessage를 호출하고 플래그를 초기화합니다.
+        sendTimeUpMessage();
+        setValidMoveFlag(false);
       }
     }
   }, [secondsWhite, secondsBlack, validMoveFlag]);
@@ -299,7 +299,7 @@ const App = () => {
               invalidMoveFlag={invalidMoveFlag}
               onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
               validMoveFlag={validMoveFlag}
-              onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
+              //onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
               boardState={boardState} // 유효한 움직임에 대해 보드 상태
               selectTeam={selectTeam} // 팀 색상
               timeOwner={timeOwner} // 현재 턴인 색상

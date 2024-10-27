@@ -47,7 +47,7 @@ const Board = ({
   invalidMoveFlag,                  // 잘못된 움직임 여부를 나타내는 플래그
   onInvalidMoveFlagComplete,        // 잘못된 움직임 수정 완료됨을 확인할 때 사용할 변수
   validMoveFlag,                    // 유효한 움직임 여부를 나타내는 플래그
-  onValidMoveFlagComplete,          // 유효한 움직임 완료됨을 확인할 때 사용할 변수
+  //onValidMoveFlagComplete,          // 유효한 움직임 완료됨을 확인할 때 사용할 변수
   boardState,                       // 유효한 움직임 이후 보드 정보를 갖고 있는 변수
   selectTeam,                       // 팀 색상
   timeOwner                         // 현재 턴인 색상
@@ -94,7 +94,7 @@ const Board = ({
       setBoard(upDatedBoard);
       setBoardStore(upDatedBoard); //다음 기물을 옮기기 전 보드상태 저장
 
-      onValidMoveFlagComplete();
+      //onValidMoveFlagComplete();
     }
   }, [resetBoardFlag, invalidMoveFlag, validMoveFlag]);
 
