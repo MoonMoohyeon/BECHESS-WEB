@@ -107,7 +107,7 @@ const App = () => {
       // 기물을 잘못 이동했을 경우 에러 메시지 설정
       else if (action[0] === "invalidMove") {
         setInvalidMoveFlag(true); // 유효하지 않은 이동 플래그
-        console.log(action[1]);
+        //console.log(action[1]);
         console.log("invalidMove!");
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
@@ -145,10 +145,17 @@ const App = () => {
   // seconds가 0이 되었거나 유효한 움직임을 수행한 경우, 서버로 메시지를 보내는 함수
   useEffect(() => {
     if (seconds === 0 || validMoveFlag === true) {
+      console.log("timeOwner!1: "+timeOwner)
       if (timeOwner === "w") {
         setTimeOwner("b");
-      } else {
+        console.log("timeOwner!2: "+timeOwner)
+      } 
+      else if (timeOwner === "b"){
         setTimeOwner("w");
+        console.log("timeOwner!3: "+timeOwner)
+      }
+      else{
+        console.log("error!!!!: "+timeOwner)
       }
 
       //턴이 끝난 팀쪽에서 다음 차례 색상을 알려줌
@@ -159,7 +166,7 @@ const App = () => {
       //seconds 초기화
       setSeconds(initialSeconds);
     }
-  }, [seconds, validMoveFlag]);
+  }, [seconds, validMoveFlag, timeOwner]);
   const sendTimeUpMessage = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
@@ -169,7 +176,7 @@ const App = () => {
         body: timeOwner, // 전송할 메시지 내용
       });
       console.log(
-        "current TimeOwner:" + timeOwner + " 메시지를 성공적으로 전송했습니다."
+        "current TimeOwner: " + timeOwner + " 메시지를 성공적으로 전송했습니다."
       );
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
@@ -236,8 +243,8 @@ const App = () => {
       ) : (
         <>
           <header className="App-header">
-            <h3 className="turn">{timeOwner} 차례</h3>
             <h3 className="timerText">남은시간 : {seconds}초</h3>
+            <h3 className="turn">{timeOwner} 차례</h3>
             <button
               className="button1"
               onClick={() => setIsReversed(!isReversed)}
