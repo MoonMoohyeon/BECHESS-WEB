@@ -14,7 +14,8 @@ const App = () => {
 
   /*타이머 관련 변수*/
   const initialSeconds = 15; // 초기 시간 설정
-  const [seconds, setSeconds] = useState(initialSeconds); // 현재 시간
+  const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
+  const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
 
   /*보드 상하좌우 반전 여부 관리*/
@@ -88,6 +89,7 @@ const App = () => {
     if (message.body) {
       console.log("받아온 메시지 : " + message.body);
       const action = message.body.split("\n");
+      const action2 = message.body.split(" ");
       // gameStart 메시지를 받으면 게임 시작 상태로 업데이트
       if (action[0] === "gameStart") {
         setGameStarted(true);
@@ -112,6 +114,22 @@ const App = () => {
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       }
+
+      // 현재 턴이 끝난 팀 정보를 받아 timeOwner 변수에 저장함
+      if (action2[0] === "gameOver") {
+        if (action2[1] === "w") {
+          setTimeOwner("b");
+          setSecondsBlack(initialSeconds);
+        } 
+        else if (action2[1] === "b"){
+          setTimeOwner("w");
+          setSecondsWhite(initialSeconds);
+        }
+        else{
+          console.log("error!!!!: "+timeOwner)
+        }
+      } 
+
     } else {
       console.log("메시지 is empty...");
     }
@@ -135,38 +153,44 @@ const App = () => {
   // 타이머 useEfferct
   useEffect(() => {
     // gameStart 상태이고 seconds가 0이 아닌 경우 1초씩 감소시킴
-    if (gameStarted === true && seconds > 0) {
-      const timer = setInterval(() => {
-        setSeconds(seconds - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [gameStarted, seconds]);
-  // seconds가 0이 되었거나 유효한 움직임을 수행한 경우, 서버로 메시지를 보내는 함수
-  useEffect(() => {
-    if (seconds === 0 || validMoveFlag === true) {
-      console.log("timeOwner!1: "+timeOwner)
-      if (timeOwner === "w") {
-        setTimeOwner("b");
-        console.log("timeOwner!2: "+timeOwner)
-      } 
-      else if (timeOwner === "b"){
-        setTimeOwner("w");
-        console.log("timeOwner!3: "+timeOwner)
+    if (gameStarted === true && (secondsWhite > 0 || secondsBlack > 0)) {
+      if(timeOwner === "w"){
+        const timer = setInterval(() => {
+          setSecondsWhite(secondsWhite - 1);
+        }, 1000);
+        return () => clearInterval(timer);
       }
       else{
-        console.log("error!!!!: "+timeOwner)
+        const timer = setInterval(() => {
+          setSecondsBlack(secondsBlack - 1);
+        }, 1000);
+        return () => clearInterval(timer);
       }
-
-      //턴이 끝난 팀쪽에서 다음 차례 색상을 알려줌
-      if(timeOwner !== selectTeam){
-        sendTimeUpMessage();        
-      }
-
-      //seconds 초기화
-      setSeconds(initialSeconds);
     }
-  }, [seconds, validMoveFlag, timeOwner]);
+  }, [gameStarted, secondsWhite, secondsBlack]);
+  useEffect(() => {
+    //현재 팀이 턴 주인인 경우
+    if(timeOwner === selectTeam){
+      if(timeOwner==="w"){
+        // seconds가 0이 되었거나 유효한 움직임을 수행한 경우
+        if (secondsWhite === 0 || validMoveFlag === true) {  
+          //턴이 끝난 팀 색상을 서버에 알려줌
+          sendTimeUpMessage(); 
+          //seconds 초기화
+          setSecondsWhite(0);
+        }
+      }
+      else{
+        // seconds가 0이 되었거나 유효한 움직임을 수행한 경우
+        if (secondsBlack === 0 || validMoveFlag === true) {  
+          //턴이 끝난 팀 색상을 서버에 알려줌
+          sendTimeUpMessage(); 
+          //seconds 초기화
+          setSecondsBlack(0);
+        }
+      }
+    }
+  }, [secondsWhite, secondsBlack, validMoveFlag, timeOwner]);
   const sendTimeUpMessage = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
@@ -176,7 +200,7 @@ const App = () => {
         body: timeOwner, // 전송할 메시지 내용
       });
       console.log(
-        "current TimeOwner: " + timeOwner + " 메시지를 성공적으로 전송했습니다."
+        "TimeOver: " + timeOwner + " 메시지를 성공적으로 전송했습니다."
       );
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
@@ -243,8 +267,21 @@ const App = () => {
       ) : (
         <>
           <header className="App-header">
-            <h3 className="timerText">남은시간 : {seconds}초</h3>
-            <h3 className="turn">{timeOwner} 차례</h3>
+            <h3 className="timerText">
+              남은시간 :{" "}
+              {
+                selectTeam === "w"
+
+                  ? secondsWhite <= 0
+                    ? "상대 턴"
+                    : `${secondsWhite}초`
+
+                  : secondsBlack <= 0
+                  ? "상대 턴"
+                  : `${secondsBlack}초`
+              }
+            </h3>
+            <h3 className="turn">{timeOwner==="w"? "백 " : "흑 "} 차례</h3>
             <button
               className="button1"
               onClick={() => setIsReversed(!isReversed)}
