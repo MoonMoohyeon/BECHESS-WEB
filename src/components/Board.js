@@ -82,9 +82,9 @@ const Board = ({
       console.log(
         "from:", from, "\n",
         "to:", to, "\n",
-        "type", type, "\n",
-        "cocor", color, "\n", 
-        "position", position, "\n"
+        "type:", type, "\n",
+        "color:", color, "\n", 
+        "position:", position, "\n"
       );
 
       const upDatedBoard = { ...board };
