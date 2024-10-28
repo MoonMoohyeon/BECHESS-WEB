@@ -108,7 +108,6 @@ const App = () => {
       else if (action[0] === "validMove") {
         setBoardState(action[1]); // 옮긴 기물 위치와 색상을 웹에서 서버로 전달
         setValidMoveFlag(true); // 유효한 이동 플래그
-        //턴이 바뀜
 
         // 턴 바뀜 처리
         setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
