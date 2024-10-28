@@ -13,10 +13,12 @@ const App = () => {
   const [selectTeam, setSelectTeam] = useState("");
 
   /*타이머 관련 변수*/
-  const initialSeconds = 10; // 초기 시간 설정
+  const initialSeconds = 30; // 초기 시간 설정
   const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
+  const [timeOverWhite, setTimeOverWhite] = useState(false);
+  const [timeOverBlack, setTimeOverBlack] = useState(false);
 
   /*보드 상하좌우 반전 여부 관리*/
   const [isReversed, setIsReversed] = useState(false);
@@ -34,6 +36,11 @@ const App = () => {
   const [resetBoardFlag, setResetBoardFlag] = useState(false);
   /*보드 상태 관리*/
   const [boardState, setBoardState] = useState("");
+
+  /*턴 바뀜을 서버에서 확인을 완료하였을때 사용하는 변수*/
+  const [turnChange, setTurnChange] = useState(false);
+  const [turnChangeBlackToWhite, setTurnChangeBlackToWhite] = useState(false);
+  const [turnChangeWhiteToBlack, setTurnChangeWhiteToBlack] = useState(false);
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -101,6 +108,12 @@ const App = () => {
       else if (action[0] === "validMove") {
         setBoardState(action[1]); // 옮긴 기물 위치와 색상을 웹에서 서버로 전달
         setValidMoveFlag(true); // 유효한 이동 플래그
+        //턴이 바뀜
+
+        // 턴 바뀜 처리
+        setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
+        console.log("validMove! timeOwner updated to", timeOwner === "w" ? "흑" : "백");
+
         //console.log(action[1]);
         console.log("validMove!");
         return 0;
@@ -114,28 +127,23 @@ const App = () => {
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       }
+      /*
 
       // 현재 턴이 끝난 팀 정보를 받아 timeOwner 변수에 저장함
       if (action2[0] === "gameOver") {
         if (action2[1] === "w") {
-          //console.log("BlackTurn!!!!!! "+secondsBlack);
+          //setTurnChangeWhiteToBlack(true);
           setTimeOwner("b");
-          // if (selectTeam === "b")
-          //   setSecondsBlack(initialSeconds);
-          //   console.log("초기화 black!!!!!! "+secondsBlack);
         } 
         else if (action2[1] === "b"){
-          //console.log("whiteTurn!!!!!!");
-          //console.log("초기화 white!!!!!! "+secondsWhite);
+          //setTurnChangeBlackToWhite(true);
           setTimeOwner("w");
-          // if(selectTeam === "w")
-          //   setSecondsWhite(initialSeconds);
-          // console.log("초기화 white!!!!!! "+secondsWhite);
         }
         else{
-          console.log("error!!!!: "+timeOwner)
+          console.log("error!!!!: "+timeOwner);
         }
       } 
+      */
 
     } else {
       console.log("메시지 is empty...");
@@ -159,40 +167,39 @@ const App = () => {
   /*타이머 처리 부분*/
   // 타이머 useEfferct
   useEffect(() => {
+    console.log("!!! "+timeOwner+"\n");
     // gameStart 상태이고 seconds가 0이 아닌 경우 1초씩 감소시킴
-    if (gameStarted && timeOwner === selectTeam){
+    if (gameStarted && (timeOwner === selectTeam)){
       let timer;
-
-      if (timeOwner === "w" && secondsWhite > 0) {
+      if (selectTeam === "w" && secondsWhite > 0) {
         timer = setInterval(() => {
-          setSecondsWhite((prevSeconds) => prevSeconds - 1);
+          setSecondsWhite((prevSeconds) => {
+            if (timeOwner !== "w") return prevSeconds; // timeOwner가 "w"가 아니면 감소 중지
+            if (secondsWhite <= 0){
+              sendTimeUpMessage();
+              return 0;
+            }
+            return prevSeconds - 1;
+          });
         }, 1000);
-      } else if (timeOwner === "b" && secondsBlack > 0) {
+      } 
+      else if (selectTeam === "b" && secondsBlack > 0) {
         timer = setInterval(() => {
-          setSecondsBlack((prevSeconds) => prevSeconds - 1);
+          setSecondsBlack((prevSeconds) => {
+            if (timeOwner !== "b") return prevSeconds; // timeOwner가 "b"가 아니면 감소 중지
+            if (secondsBlack <= 0){
+              sendTimeUpMessage();
+              return 0;
+            }
+            return prevSeconds - 1;
+          });
         }, 1000);
       }
+
       return () => clearInterval(timer);
     }
-  }, [gameStarted, timeOwner, selectTeam, secondsWhite, secondsBlack]);
-  // 시간이 0에 도달하거나 유효한 움직임이 수행되었을 때 동작하는 useEffect
-  useEffect(() => {
-    if (timeOwner === selectTeam) {
-      if (timeOwner === "w" && (secondsWhite <= 0 || validMoveFlag === true)) {
-        sendTimeUpMessage(); // 턴 종료 메시지 전송
-        setSecondsWhite(initialSeconds); // 타이머 초기화
-        // if(validMoveFlag === true){
-        //   setValidMoveFlag(false);
-        // }
-      } else if (timeOwner === "b" && (secondsBlack <= 0 || validMoveFlag === true)) {
-        sendTimeUpMessage(); // 턴 종료 메시지 전송
-        setSecondsBlack(initialSeconds); // 타이머 초기화
-        // if(validMoveFlag === true){
-        //   setValidMoveFlag(false);
-        // }
-      }
-    }
-  }, [secondsWhite, secondsBlack, validMoveFlag]);
+  }, [selectTeam, timeOwner, secondsWhite, secondsBlack]);
+
   const sendTimeUpMessage = () => {
     // client가 연결 가능한지 확인
     if (client.current.connected) {
@@ -275,8 +282,8 @@ const App = () => {
               남은시간 :{" "}
               {
                 selectTeam === "w"
-                  ? (selectTeam !== timeOwner ? "상대 턴" : `${secondsWhite}초`)
-                  : (selectTeam !== timeOwner ? "상대 턴" : `${secondsBlack}초`)
+                  ? (selectTeam !== timeOwner ? `상대 턴 ${secondsWhite}초` : `${secondsWhite}초`)
+                  : (selectTeam !== timeOwner ? `상대 턴 ${secondsBlack}초` : `${secondsBlack}초`)
               }
             </h3>
             <h3 className="turn">{timeOwner==="w"? "백 " : "흑 "} 차례</h3>
