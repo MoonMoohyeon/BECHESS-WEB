@@ -112,9 +112,6 @@ const App = () => {
         // 턴 바뀜 처리
         setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
         console.log("validMove! timeOwner updated to", timeOwner === "w" ? "흑" : "백");
-
-        //console.log(action[1]);
-        console.log("validMove!");
         return 0;
       }
 
@@ -125,6 +122,9 @@ const App = () => {
         console.log("invalidMove!");
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
+      }
+      else if (action[0] === "boardReset") {
+        setResetBoardFlag(true);
       }
       /*
 
@@ -166,7 +166,7 @@ const App = () => {
   /*타이머 처리 부분*/
   // 타이머 useEfferct
   useEffect(() => {
-    console.log("!!! "+timeOwner+"\n");
+    //console.log("!!! "+timeOwner+"\n");
     // gameStart 상태이고 seconds가 0이 아닌 경우 1초씩 감소시킴
     if (gameStarted && (timeOwner === selectTeam)){
       let timer;
