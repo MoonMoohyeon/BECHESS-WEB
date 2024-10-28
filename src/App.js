@@ -228,6 +228,9 @@ const App = () => {
   };
   useEffect(() => {
     if (resetBoardFlag === true) {
+      setTimeOwner("w");
+      setSecondsWhite(initialSeconds);
+      setSecondsBlack(initialSeconds);
       resetMessage();
     }
   }, [resetBoardFlag]);

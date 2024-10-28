@@ -91,6 +91,29 @@ const Board = ({
       upDatedBoard[from] = null;
       upDatedBoard[to] = { type: type, color: color, position: position };
 
+      /*
+      if(castling==true){
+        if(poition == "1,7"){
+          upDatedBoard["0,7"] = null;
+          upDatedBoard["2,7"] = {type: "r", color: color, position: "2,7"}
+        }
+        else if(poition == "6,7"){
+          upDatedBoard["7,7"] = null;
+          upDatedBoard["5,7"] = {type: "r", color: color, position: "5,7"}
+        }
+        else if(poition == "1,0"){
+          upDatedBoard["0,0"] = null;
+          upDatedBoard["2,0"] = {type: "r", color: color, position: "2,7"}
+        }
+        else{
+          upDatedBoard["7,0"] = null;
+          upDatedBoard["5,0"] = {type: "r", color: color, position: "5,7"}
+        }
+
+        onResetComplete();
+      }
+      */
+
       setBoard(upDatedBoard);
       setBoardStore(upDatedBoard); //다음 기물을 옮기기 전 보드상태 저장
 
