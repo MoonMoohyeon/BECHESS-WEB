@@ -17,8 +17,6 @@ const App = () => {
   const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
-  const [timeOverWhite, setTimeOverWhite] = useState(false);
-  const [timeOverBlack, setTimeOverBlack] = useState(false);
 
   /*보드 상하좌우 반전 여부 관리*/
   const [isReversed, setIsReversed] = useState(false);
@@ -36,11 +34,6 @@ const App = () => {
   const [resetBoardFlag, setResetBoardFlag] = useState(false);
   /*보드 상태 관리*/
   const [boardState, setBoardState] = useState("");
-
-  /*턴 바뀜을 서버에서 확인을 완료하였을때 사용하는 변수*/
-  const [turnChange, setTurnChange] = useState(false);
-  const [turnChangeBlackToWhite, setTurnChangeBlackToWhite] = useState(false);
-  const [turnChangeWhiteToBlack, setTurnChangeWhiteToBlack] = useState(false);
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -126,7 +119,7 @@ const App = () => {
       else if (action[0] === "boardReset") {
         setResetBoardFlag(true);
       }
-      /*
+      
 
       // 현재 턴이 끝난 팀 정보를 받아 timeOwner 변수에 저장함
       if (action2[0] === "gameOver") {
@@ -142,7 +135,7 @@ const App = () => {
           console.log("error!!!!: "+timeOwner);
         }
       } 
-      */
+      
 
     } else {
       console.log("메시지 is empty...");
@@ -166,7 +159,7 @@ const App = () => {
   /*타이머 처리 부분*/
   // 타이머 useEfferct
   useEffect(() => {
-    //console.log("!!! "+timeOwner+"\n");
+    console.log("!!! "+timeOwner+"\n");
     // gameStart 상태이고 seconds가 0이 아닌 경우 1초씩 감소시킴
     if (gameStarted && (timeOwner === selectTeam)){
       let timer;
@@ -277,14 +270,18 @@ const App = () => {
       ) : (
         <>
           <header className="App-header">
-            <h3 className="timerText">
-              남은시간 :{" "}
-              {
-                selectTeam === "w"
-                  ? (selectTeam !== timeOwner ? `상대 턴 ${secondsWhite}초` : `${secondsWhite}초`)
-                  : (selectTeam !== timeOwner ? `상대 턴 ${secondsBlack}초` : `${secondsBlack}초`)
-              }
-            </h3>
+          <h3 className="timerText">
+            남은시간 :{" "}
+            {
+              selectTeam === "w"
+                ? (secondsWhite <= 0 
+                    ? "타임오버 패배" 
+                    : (selectTeam !== timeOwner ? `상대 턴 ${secondsWhite}초` : `${secondsWhite}초`))
+                : (secondsBlack <= 0 
+                    ? "타임오버 패배" 
+                    : (selectTeam !== timeOwner ? `상대 턴 ${secondsBlack}초` : `${secondsBlack}초`))
+            }
+          </h3>
             <h3 className="turn">{timeOwner==="w"? "백 " : "흑 "} 차례</h3>
             <button
               className="button1"
