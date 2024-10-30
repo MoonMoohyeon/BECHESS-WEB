@@ -13,7 +13,7 @@ const App = () => {
   const [selectTeam, setSelectTeam] = useState("");
 
   /*타이머 관련 변수*/
-  const initialSeconds = 100; // 초기 시간 설정
+  const initialSeconds = 100000; // 초기 시간 설정
   const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
@@ -38,6 +38,7 @@ const App = () => {
 
   /*체스 규칙 관련 변수*/
   const [castling, setCastling] = useState(false);
+  const [enpassant, setEnpasenpassant] = useState(false);
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -105,12 +106,16 @@ const App = () => {
       else if (action[0] === "validMove") {
         setBoardState(action[1]); // 옮긴 기물 위치와 색상을 웹에서 서버로 전달
         const pieceInform = action[1].split(" ");
-        console.log(pieceInform);
-        console.log(pieceInform[pieceInform.length-3]);
+        //console.log(pieceInform);
+        //console.log(pieceInform[pieceInform.length-3]);
 
         if(pieceInform[pieceInform.length-3] === "castle"){
           setCastling(true);
           console.log("caslting!!!");
+        }
+        else if(pieceInform[pieceInform.length-3] === "enpassant"){
+          setEnpasenpassant(true);
+          console.log("enpassant!!!");
         }
 
         setValidMoveFlag(true); // 유효한 이동 플래그
@@ -345,6 +350,8 @@ const App = () => {
 
               castling={castling}
               onCastlingComplete={() => setCastling(false)}
+              enpassant={enpassant}
+              onEnpassantComplete={() => setEnpasenpassant(false)}
             />
           </main>
 

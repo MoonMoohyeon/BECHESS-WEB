@@ -51,8 +51,12 @@ const Board = ({
   boardState,                       // 유효한 움직임 이후 보드 정보를 갖고 있는 변수
   selectTeam,                       // 팀 색상
   timeOwner,                        // 현재 턴인 색상
+
   castling,
-  onCastlingComplete
+  onCastlingComplete,
+
+  enpassant,
+  onEnpassantComplete
 }) => {
   const [board, setBoard] = useState(initialBoardSetup);             // 현재 보드 상태를 나타냄
   const [draggedPiece, setDraggedPiece] = useState(null);            // 마우스로 드래그한 기물 정보 저장
@@ -97,22 +101,40 @@ const Board = ({
 
         if(clastlingRook === "2,7"){
           upDatedBoard["0,7"] = null;
-          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook};
         }
         else if(clastlingRook === "4,7"){
           upDatedBoard["7,7"] = null;
-          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook};
         }
         else if(clastlingRook === "2,0"){
           upDatedBoard["0,0"] = null;
-          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook};
         }
         else{
           upDatedBoard["7,0"] = null;
-          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook};
         }
 
         onCastlingComplete();
+      }
+      else if(enpassant===true){
+        const enpassantPawn = pieceInform[pieceInform.length-1];
+        const [col, row] = enpassantPawn.split(",").map(Number);
+
+        if(color === "w"){ 
+          const new_row = row - 1;
+          const removePawnPosition = String(col)+","+String(new_row);
+          upDatedBoard[removePawnPosition] = null;
+          console.log("removePawnPosition: "+removePawnPosition);
+        }
+        else{
+          const new_row = row + 1;
+          const removePawnPosition = String(col)+","+String(new_row);
+          upDatedBoard[removePawnPosition] = null;
+          console.log("removePawnPosition: "+removePawnPosition);
+        }
+        onEnpassantComplete();
       }
       
 
@@ -125,7 +147,7 @@ const Board = ({
 
   const handleDragStart = (e, piece, position) => {
     // 본인 차례일 때 드래그 가능
-    if(timeOwner != selectTeam){
+    if(timeOwner !== selectTeam){
       return;
     }
     //본인 팀 기물만 드래그 할 수 있음
