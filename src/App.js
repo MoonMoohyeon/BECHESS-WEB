@@ -32,6 +32,7 @@ const App = () => {
   const [validMoveFlag, setValidMoveFlag] = useState(false);
   /*보드를 리셋하는데 사용할 변수*/
   const [resetBoardFlag, setResetBoardFlag] = useState(false);
+  const [resetButtonPress, setResetButtonPress] = useState(0);
   /*보드 상태 관리*/
   const [boardState, setBoardState] = useState("");
 
@@ -116,8 +117,11 @@ const App = () => {
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       }
+
       else if (action[0] === "boardReset") {
-        setResetBoardFlag(true);
+        if(resetButtonPress === 0 && resetBoardFlag === false){
+          setResetBoardFlag(true);
+        }
       }
       
 
@@ -227,11 +231,22 @@ const App = () => {
     }
   };
   useEffect(() => {
-    if (resetBoardFlag === true) {
+    //버튼 누를 경우 서버에 reset메시지 전송
+    if(resetButtonPress === 1 && resetBoardFlag === true){
       setTimeOwner("w");
       setSecondsWhite(initialSeconds);
       setSecondsBlack(initialSeconds);
       resetMessage();
+    }
+    //버튼 누르지 않은 경우 보드 초기화만 함
+    else if(resetButtonPress === 0 && resetBoardFlag === true){
+      setTimeOwner("w");
+      setSecondsWhite(initialSeconds);
+      setSecondsBlack(initialSeconds);
+    }
+    //버튼이 눌러져 있는 경우 리셋 후 초기화
+    else if(resetButtonPress === 1  && resetBoardFlag ===false){
+      setResetButtonPress(0);
     }
   }, [resetBoardFlag]);
 
@@ -292,7 +307,13 @@ const App = () => {
             >
               보드 반전
             </button>
-            <button className="button1" onClick={() => setResetBoardFlag(true)}>
+            <button 
+              className="button1" 
+              onClick={() => {
+                setResetButtonPress(1);
+                setResetBoardFlag(true);
+              }}
+            >
               보드 초기화
             </button>
           </header>
