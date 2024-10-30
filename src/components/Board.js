@@ -50,7 +50,9 @@ const Board = ({
   onValidMoveFlagComplete,          // 유효한 움직임 완료됨을 확인할 때 사용할 변수
   boardState,                       // 유효한 움직임 이후 보드 정보를 갖고 있는 변수
   selectTeam,                       // 팀 색상
-  timeOwner                         // 현재 턴인 색상
+  timeOwner,                        // 현재 턴인 색상
+  castling,
+  onCastlingComplete
 }) => {
   const [board, setBoard] = useState(initialBoardSetup);             // 현재 보드 상태를 나타냄
   const [draggedPiece, setDraggedPiece] = useState(null);            // 마우스로 드래그한 기물 정보 저장
@@ -67,7 +69,6 @@ const Board = ({
     }
     if (invalidMoveFlag) {
       setBoard(boardStore); // 이전 보드 상태로 복구
-
       onInvalidMoveFlagComplete(); // 이전 보드 상태로 복구 완료 시 플래그 해제
     }
     if (validMoveFlag) {
@@ -91,35 +92,36 @@ const Board = ({
       upDatedBoard[from] = null;
       upDatedBoard[to] = { type: type, color: color, position: position };
 
-      /*
-      if(castling==true){
-        if(poition == "1,7"){
+      if(castling===true){
+        const clastlingRook = pieceInform[pieceInform.length-1];
+
+        if(clastlingRook === "2,7"){
           upDatedBoard["0,7"] = null;
-          upDatedBoard["2,7"] = {type: "r", color: color, position: "2,7"}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
         }
-        else if(poition == "6,7"){
+        else if(clastlingRook === "4,7"){
           upDatedBoard["7,7"] = null;
-          upDatedBoard["5,7"] = {type: "r", color: color, position: "5,7"}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
         }
-        else if(poition == "1,0"){
+        else if(clastlingRook === "2,0"){
           upDatedBoard["0,0"] = null;
-          upDatedBoard["2,0"] = {type: "r", color: color, position: "2,7"}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
         }
         else{
           upDatedBoard["7,0"] = null;
-          upDatedBoard["5,0"] = {type: "r", color: color, position: "5,7"}
+          upDatedBoard[clastlingRook] = {type: "r", color: color, position: clastlingRook}
         }
 
-        onResetComplete();
+        onCastlingComplete();
       }
-      */
+      
 
       setBoard(upDatedBoard);
       setBoardStore(upDatedBoard); //다음 기물을 옮기기 전 보드상태 저장
 
       onValidMoveFlagComplete();
     }
-  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag]);
+  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag, castling]);
 
   const handleDragStart = (e, piece, position) => {
     // 본인 차례일 때 드래그 가능

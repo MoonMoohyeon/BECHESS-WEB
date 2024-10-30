@@ -13,7 +13,7 @@ const App = () => {
   const [selectTeam, setSelectTeam] = useState("");
 
   /*타이머 관련 변수*/
-  const initialSeconds = 30; // 초기 시간 설정
+  const initialSeconds = 100; // 초기 시간 설정
   const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
@@ -35,6 +35,9 @@ const App = () => {
   const [resetButtonPress, setResetButtonPress] = useState(0);
   /*보드 상태 관리*/
   const [boardState, setBoardState] = useState("");
+
+  /*체스 규칙 관련 변수*/
+  const [castling, setCastling] = useState(false);
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -101,6 +104,15 @@ const App = () => {
       // validMove 메시지를 받으면 보드상태 업데이트
       else if (action[0] === "validMove") {
         setBoardState(action[1]); // 옮긴 기물 위치와 색상을 웹에서 서버로 전달
+        const pieceInform = action[1].split(" ");
+        console.log(pieceInform);
+        console.log(pieceInform[pieceInform.length-3]);
+
+        if(pieceInform[pieceInform.length-3] === "castle"){
+          setCastling(true);
+          console.log("caslting!!!");
+        }
+
         setValidMoveFlag(true); // 유효한 이동 플래그
 
         // 턴 바뀜 처리
@@ -117,7 +129,7 @@ const App = () => {
         setInvalidMoveMessage("잘못된 이동입니다."); // 웹에 나타낼 에러 메시지 설정
         setTimeout(() => setInvalidMoveMessage(""), 1500); // 1.5초 후에 메시지 제거
       }
-
+      // 보드 초기화 메시지를 받았을 때
       else if (action[0] === "boardReset") {
         if(resetButtonPress === 0 && resetBoardFlag === false){
           setResetBoardFlag(true);
@@ -128,11 +140,9 @@ const App = () => {
       // 현재 턴이 끝난 팀 정보를 받아 timeOwner 변수에 저장함
       if (action2[0] === "gameOver") {
         if (action2[1] === "w") {
-          //setTurnChangeWhiteToBlack(true);
           setTimeOwner("b");
         } 
         else if (action2[1] === "b"){
-          //setTurnChangeBlackToWhite(true);
           setTimeOwner("w");
         }
         else{
@@ -332,6 +342,9 @@ const App = () => {
               boardState={boardState} // 유효한 움직임에 대해 보드 상태
               selectTeam={selectTeam} // 팀 색상
               timeOwner={timeOwner} // 현재 턴인 색상
+
+              castling={castling}
+              onCastlingComplete={() => setCastling(false)}
             />
           </main>
 
