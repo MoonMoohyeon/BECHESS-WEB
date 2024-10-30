@@ -39,6 +39,8 @@ const App = () => {
   /*체스 규칙 관련 변수*/
   const [castling, setCastling] = useState(false);
   const [enpassant, setEnpasenpassant] = useState(false);
+  const [promotion, setPromotion] = useState(false);
+  const [promotionPiece, setPromotionPiece] = useState("");
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -118,12 +120,26 @@ const App = () => {
           console.log("enpassant!!!");
         }
 
-        setValidMoveFlag(true); // 유효한 이동 플래그
-
         // 턴 바뀜 처리
         setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
-        console.log("validMove! timeOwner updated to", timeOwner === "w" ? "흑" : "백");
+
+        if(pieceInform[pieceInform.length-3] === "promotion"){
+          setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
+          setPromotion(true);
+          console.log("promotion!!!");
+        }
+
+        setValidMoveFlag(true); // 유효한 이동 플래그
+
+        //console.log("validMove! timeOwner updated to", timeOwner === "w" ? "흑" : "백");
         return 0;
+      }
+      // 다른 팀의 promotion에 의한 piece 수정
+      else if(action[0] === "promotionInfo"){
+        if(promotion===true && promotionPiece === ""){
+          setPromotionPiece(action[1]);
+          setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
+        }
       }
 
       // 기물을 잘못 이동했을 경우 에러 메시지 설정
@@ -287,6 +303,27 @@ const App = () => {
     }
   };
 
+  /*Promotion useEffect*/
+  //본인 팀이 timeOwner인 경우, promotion 결과를 다른 팀에 전달한다.
+  // useEffect(() => {
+  //   if(timeOwner === selectTeam && promotion === true && promotionPiece!==""){
+  //     sendPromotionInfo();
+  //   }
+  // }, [promotionPiece]);
+  // const sendPromotionInfo = () => {
+  //   // client가 연결 가능한지 확인
+  //   if (client.current.connected) {
+  //     // 메시지 보내기
+  //     client.current.publish({
+  //       destination: "/app/Web/", // 스프링 부트 컨트롤러의 엔드포인트
+  //       body: "promotionPiece : " + promotionPiece, // 전송할 메시지 내용
+  //     });
+  //     console.log("promotionPiece :" + promotionPiece + " 메시지를 성공적으로 전송했습니다.");
+  //   } else {
+  //     console.log("WebSocket 연결이 되어 있지 않습니다.");
+  //   }
+  // };
+
 
   return (
     <div className="App">
@@ -352,12 +389,30 @@ const App = () => {
               onCastlingComplete={() => setCastling(false)}
               enpassant={enpassant}
               onEnpassantComplete={() => setEnpasenpassant(false)}
+              
+              promotion={promotion}
+              onPromotionComplete={() => {
+                setPromotion(false);
+                setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
+              }}
+              promotionPiece={promotionPiece}
+              onPromotionPieceComplete={() => setPromotionPiece("")}
+
             />
           </main>
 
           <footer className="App-footer">
             {invalidMoveMessage && (
               <h3 className="error-message">{invalidMoveMessage}</h3>
+            )}
+            {selectTeam === timeOwner && promotion && (
+              <>
+              <p>Choose a piece for promotion:</p>
+              <button onClick={() => setPromotionPiece("q")}>Queen</button>
+              <button onClick={() => setPromotionPiece("r")}>Rook</button>
+              <button onClick={() => setPromotionPiece("b")}>Bishop</button>
+              <button onClick={() => setPromotionPiece("n")}>Knight</button>
+              </>
             )}
           </footer>
         </>

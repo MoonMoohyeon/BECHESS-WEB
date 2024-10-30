@@ -56,7 +56,12 @@ const Board = ({
   onCastlingComplete,
 
   enpassant,
-  onEnpassantComplete
+  onEnpassantComplete,
+
+  promotion,
+  onPromotionComplete,
+  promotionPiece,
+  onPromotionPieceComplete
 }) => {
   const [board, setBoard] = useState(initialBoardSetup);             // 현재 보드 상태를 나타냄
   const [draggedPiece, setDraggedPiece] = useState(null);            // 마우스로 드래그한 기물 정보 저장
@@ -125,16 +130,28 @@ const Board = ({
         if(color === "w"){ 
           const new_row = row - 1;
           const removePawnPosition = String(col)+","+String(new_row);
-          upDatedBoard[removePawnPosition] = null;
           console.log("removePawnPosition: "+removePawnPosition);
+          upDatedBoard[removePawnPosition] = null;
         }
         else{
           const new_row = row + 1;
           const removePawnPosition = String(col)+","+String(new_row);
-          upDatedBoard[removePawnPosition] = null;
           console.log("removePawnPosition: "+removePawnPosition);
+          upDatedBoard[removePawnPosition] = null;
         }
         onEnpassantComplete();
+      }
+      else if(promotion===true){
+        if(promotionPiece !==""){
+          upDatedBoard[to] = { type: promotionPiece, color: color, position: position };
+          onPromotionComplete();
+          onPromotionPieceComplete();
+        }
+        else{
+          setBoard(upDatedBoard);
+          setBoardStore(upDatedBoard); //다음 기물을 옮기기 전 보드상태 저장
+          return;
+        }
       }
       
 
@@ -143,11 +160,11 @@ const Board = ({
 
       onValidMoveFlagComplete();
     }
-  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag, castling]);
+  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag, castling, enpassant, promotion, promotionPiece]);
 
   const handleDragStart = (e, piece, position) => {
-    // 본인 차례일 때 드래그 가능
-    if(timeOwner !== selectTeam){
+    // 본인 차례일 때 드래그 가능 + promotion 중일 때 드래그 못함
+    if(timeOwner !== selectTeam || promotion === true){
       return;
     }
     //본인 팀 기물만 드래그 할 수 있음
