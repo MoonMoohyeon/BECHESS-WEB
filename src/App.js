@@ -138,7 +138,6 @@ const App = () => {
       else if(action[0] === "promotionInfo"){
         if(promotion===true && promotionPiece === ""){
           setPromotionPiece(action[1]);
-          setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
         }
       }
 
