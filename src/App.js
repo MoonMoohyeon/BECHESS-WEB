@@ -320,13 +320,14 @@ const App = () => {
     if (client.current.connected) {
       // 메시지 보내기
       client.current.publish({
-        destination: "/app/Web/", // 스프링 부트 컨트롤러의 엔드포인트
-        body: "promotionPiece : " + promotionPiece, // 전송할 메시지 내용
+        destination: "/app/Web/promotion", // 스프링 부트 컨트롤러의 엔드포인트
+        body: "to : "+boardState.split(" ")[5]+"\n"+"promotion : "+promotionPiece, // 전송할 메시지 내용
       });
       console.log("promotionPiece :" + promotionPiece + " 메시지를 성공적으로 전송했습니다.");
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
+    console.log("to : "+boardState.split(" ")[5]+"\n"+"promotion : "+promotionPiece);
   };
 
 
