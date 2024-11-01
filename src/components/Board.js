@@ -73,6 +73,7 @@ const Board = ({
     if (resetBoardFlag) {
       //보드 초기화
       setBoard(initialBoardSetup);
+      setBoardStore(initialBoardSetup);
       //보드 초기화를 완료했음을 알림
       onResetComplete();
     }

@@ -41,6 +41,7 @@ const App = () => {
   const [enpassant, setEnpasenpassant] = useState(false);
   const [promotion, setPromotion] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState("");
+  const [promotionPieceButtonPress, setPromotionPieceButtonPress] = useState(0);
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -124,6 +125,7 @@ const App = () => {
         setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
 
         if(pieceInform[pieceInform.length-3] === "promotion"){
+          /*기물 선택할 동안 본인 차례 유지*/
           setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
           setPromotion(true);
           console.log("promotion!!!");
@@ -136,9 +138,11 @@ const App = () => {
       }
       // 다른 팀의 promotion에 의한 piece 수정
       else if(action[0] === "promotionInfo"){
-        if(promotion===true && promotionPiece === ""){
+        if(promotionPieceButtonPress === 0 && promotion===true && promotionPiece === ""){
           setPromotionPiece(action[1]);
         }
+        //버튼이 눌러져 있는 경우 초기화
+        setPromotionPieceButtonPress(0);
       }
 
       // 기물을 잘못 이동했을 경우 에러 메시지 설정
@@ -154,6 +158,8 @@ const App = () => {
         if(resetButtonPress === 0 && resetBoardFlag === false){
           setResetBoardFlag(true);
         }
+        // 버튼이 눌러져 있는 경우 초기화
+        setResetButtonPress(0);
       }
       
 
@@ -274,10 +280,10 @@ const App = () => {
       setSecondsWhite(initialSeconds);
       setSecondsBlack(initialSeconds);
     }
-    //버튼이 눌러져 있는 경우 리셋 후 초기화
-    else if(resetButtonPress === 1  && resetBoardFlag ===false){
-      setResetButtonPress(0);
-    }
+    // //버튼이 눌러져 있는 경우 리셋 후 초기화
+    // else if(resetButtonPress === 1  && resetBoardFlag ===false){
+    //   setResetButtonPress(0);
+    // }
   }, [resetBoardFlag]);
 
 
@@ -303,25 +309,25 @@ const App = () => {
   };
 
   /*Promotion useEffect*/
-  //본인 팀이 timeOwner인 경우, promotion 결과를 다른 팀에 전달한다.
-  // useEffect(() => {
-  //   if(timeOwner === selectTeam && promotion === true && promotionPiece!==""){
-  //     sendPromotionInfo();
-  //   }
-  // }, [promotionPiece]);
-  // const sendPromotionInfo = () => {
-  //   // client가 연결 가능한지 확인
-  //   if (client.current.connected) {
-  //     // 메시지 보내기
-  //     client.current.publish({
-  //       destination: "/app/Web/", // 스프링 부트 컨트롤러의 엔드포인트
-  //       body: "promotionPiece : " + promotionPiece, // 전송할 메시지 내용
-  //     });
-  //     console.log("promotionPiece :" + promotionPiece + " 메시지를 성공적으로 전송했습니다.");
-  //   } else {
-  //     console.log("WebSocket 연결이 되어 있지 않습니다.");
-  //   }
-  // };
+  useEffect(() => {
+    //resetButton을 누른 경우, promotion 결과를 다른 팀에 전달한다.
+    if(promotionPieceButtonPress === 1 && promotion === true && promotionPiece!==""){
+      sendPromotionInfo();
+    }
+  }, [promotionPiece]);
+  const sendPromotionInfo = () => {
+    // client가 연결 가능한지 확인
+    if (client.current.connected) {
+      // 메시지 보내기
+      client.current.publish({
+        destination: "/app/Web/", // 스프링 부트 컨트롤러의 엔드포인트
+        body: "promotionPiece : " + promotionPiece, // 전송할 메시지 내용
+      });
+      console.log("promotionPiece :" + promotionPiece + " 메시지를 성공적으로 전송했습니다.");
+    } else {
+      console.log("WebSocket 연결이 되어 있지 않습니다.");
+    }
+  };
 
 
   return (
@@ -392,6 +398,7 @@ const App = () => {
               promotion={promotion}
               onPromotionComplete={() => {
                 setPromotion(false);
+                // 기물 교체 완료시 상대 차례로 바뀜
                 setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
               }}
               promotionPiece={promotionPiece}
@@ -407,10 +414,10 @@ const App = () => {
             {selectTeam === timeOwner && promotion && (
               <>
               <p>Choose a piece for promotion:</p>
-              <button onClick={() => setPromotionPiece("q")}>Queen</button>
-              <button onClick={() => setPromotionPiece("r")}>Rook</button>
-              <button onClick={() => setPromotionPiece("b")}>Bishop</button>
-              <button onClick={() => setPromotionPiece("n")}>Knight</button>
+              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("q");}}>Queen</button>
+              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("r");}}>Rook</button>
+              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("b");}}>Bishop</button>
+              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("n");}}>Knight</button>
               </>
             )}
           </footer>
