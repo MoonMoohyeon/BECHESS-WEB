@@ -13,7 +13,7 @@ const App = () => {
   const [selectTeam, setSelectTeam] = useState("");
 
   /*타이머 관련 변수*/
-  const initialSeconds = 100000; // 초기 시간 설정
+  const initialSeconds = 3; // 초기 시간 설정
   const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
@@ -38,10 +38,13 @@ const App = () => {
 
   /*체스 규칙 관련 변수*/
   const [castling, setCastling] = useState(false);
-  const [enpassant, setEnpasenpassant] = useState(false);
+  const [enpassant, setEnpassant] = useState(false);
   const [promotion, setPromotion] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState("");
   const [promotionPieceButtonPress, setPromotionPieceButtonPress] = useState(0);
+
+  /*승패여부*/
+  const [result, setResult] = useState(0);
 
 
   /*STOMP 프로토콜을 사용하여 웹소켓 서버에 연결*/
@@ -98,6 +101,7 @@ const App = () => {
       console.log("받아온 메시지 : " + message.body);
       const action = message.body.split("\n");
       const action2 = message.body.split(" ");
+      //console.log("받아온 메시지2: "+action2);
       // gameStart 메시지를 받으면 게임 시작 상태로 업데이트
       if (action[0] === "gameStart") {
         setGameStarted(true);
@@ -117,7 +121,7 @@ const App = () => {
           console.log("caslting!!!");
         }
         else if(pieceInform[pieceInform.length-3] === "enpassant"){
-          setEnpasenpassant(true);
+          setEnpassant(true);
           console.log("enpassant!!!");
         }
 
@@ -162,18 +166,21 @@ const App = () => {
         setResetButtonPress(0);
       }
       
-
       // 현재 턴이 끝난 팀 정보를 받아 timeOwner 변수에 저장함
       if (action2[0] === "gameOver") {
-        if (action2[1] === "w") {
-          setTimeOwner("b");
+        console.log("gameOver!!!!!");
+        if (selectTeamRef.current === action2[1]) {
+          setResult(-1);
+          console.log(selectTeamRef.current);
+          console.log(action2[1]);
         } 
-        else if (action2[1] === "b"){
-          setTimeOwner("w");
-        }
         else{
-          console.log("error!!!!: "+timeOwner);
+          setResult(1);
+          console.log(selectTeamRef.current);
+          console.log(action2[1]);
         }
+        setSecondsWhite(-1);
+        setSecondsBlack(-1);
       } 
       
 
@@ -203,7 +210,7 @@ const App = () => {
     // gameStart 상태이고 seconds가 0이 아닌 경우 1초씩 감소시킴
     if (gameStarted && (timeOwner === selectTeam)){
       let timer;
-      if (selectTeam === "w" && secondsWhite > 0) {
+      if (selectTeam === "w" && secondsWhite >= 0) {
         timer = setInterval(() => {
           setSecondsWhite((prevSeconds) => {
             if (timeOwner !== "w") return prevSeconds; // timeOwner가 "w"가 아니면 감소 중지
@@ -215,7 +222,7 @@ const App = () => {
           });
         }, 1000);
       } 
-      else if (selectTeam === "b" && secondsBlack > 0) {
+      else if (selectTeam === "b" && secondsBlack >= 0) {
         timer = setInterval(() => {
           setSecondsBlack((prevSeconds) => {
             if (timeOwner !== "b") return prevSeconds; // timeOwner가 "b"가 아니면 감소 중지
@@ -240,11 +247,11 @@ const App = () => {
         destination: "/app/Web/timeUp", // 스프링 부트 컨트롤러의 엔드포인트
         body: timeOwner, // 전송할 메시지 내용
       });
-      /*
+      
       console.log(
         "TimeOver: " + timeOwner + " 메시지를 성공적으로 전송했습니다."
       );
-      */
+      
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
@@ -327,105 +334,122 @@ const App = () => {
     } else {
       console.log("WebSocket 연결이 되어 있지 않습니다.");
     }
-    console.log("to : "+boardState.split(" ")[5]+"\n"+"promotion : "+promotionPiece);
+    //console.log("to : "+boardState.split(" ")[5]+"\n"+"promotion : "+promotionPiece);
   };
+
+
+  const selectTeamRef = useRef(selectTeam);
+  // selectTeam이 변경될 때마다 useRef 값 업데이트
+  useEffect(() => {
+    selectTeamRef.current = selectTeam;
+  }, [selectTeam]);
 
 
   return (
     <div className="App">
-      {!gameStarted || selectTeam === ""? ( // 게임 대기 또는 팀 선택 전인 경우
-        <>
-          <h3>대기 중... 게임이 곧 시작됩니다.</h3>
-          <button className="button1" onClick={() => setSelectTeam("b")}>
-            흑
-          </button>
-          <button className="button1" onClick={() => setSelectTeam("w")}>
-            백
-          </button>
-        </>
+      {result === 1 ? ( // Show victory message if result is 1
+        <div className="result-message">
+          <h2>승리하였습니다! {result}</h2>
+        </div>
+      ) : result === -1 ? ( // Show defeat message if result is -1
+        <div className="result-message">
+          <h2>패배하였습니다... {result}</h2>
+        </div>
       ) : (
-        <>
-          <header className="App-header">
-          <h3 className="timerText">
-            남은시간 :{" "}
-            {
-              selectTeam === "w"
-                ? (secondsWhite <= 0 
-                    ? "타임오버 패배" 
-                    : (selectTeam !== timeOwner ? `상대 턴 ${secondsWhite}초` : `${secondsWhite}초`))
-                : (secondsBlack <= 0 
-                    ? "타임오버 패배" 
-                    : (selectTeam !== timeOwner ? `상대 턴 ${secondsBlack}초` : `${secondsBlack}초`))
-            }
-          </h3>
-            <h3 className="turn">{timeOwner==="w"? "백 " : "흑 "} 차례</h3>
-            <button
-              className="button1"
-              onClick={() => setIsReversed(!isReversed)}
-            >
-              보드 반전
+        !gameStarted || selectTeam === "" ? ( // 게임 대기 또는 팀 선택 전인 경우
+          <>
+            <h3>대기 중... 게임이 곧 시작됩니다.</h3>
+            <button className="button1" onClick={() => setSelectTeam("b")}>
+              흑
             </button>
-            <button 
-              className="button1" 
-              onClick={() => {
-                setResetButtonPress(1);
-                setResetBoardFlag(true);
-              }}
-            >
-              보드 초기화
+            <button className="button1" onClick={() => setSelectTeam("w")}>
+              백
             </button>
-          </header>
-
-          <main className="App-main">
-            <Board
-              className="board"
-              sendMoveData={sendMoveData}
-              isReversed={isReversed}
-              resetBoardFlag={resetBoardFlag}
-              onResetComplete={() => setResetBoardFlag(false)} // 보드를 초기화 완료 시 플래그 해제
-              invalidMoveFlag={invalidMoveFlag}
-              onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
-              validMoveFlag={validMoveFlag}
-              onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
-              boardState={boardState} // 유효한 움직임에 대해 보드 상태
-              selectTeam={selectTeam} // 팀 색상
-              timeOwner={timeOwner} // 현재 턴인 색상
-
-              castling={castling}
-              onCastlingComplete={() => setCastling(false)}
-              enpassant={enpassant}
-              onEnpassantComplete={() => setEnpasenpassant(false)}
-              
-              promotion={promotion}
-              onPromotionComplete={() => {
-                setPromotion(false);
-                // 기물 교체 완료시 상대 차례로 바뀜
-                setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
-              }}
-              promotionPiece={promotionPiece}
-              onPromotionPieceComplete={() => setPromotionPiece("")}
-
-            />
-          </main>
-
-          <footer className="App-footer">
-            {invalidMoveMessage && (
-              <h3 className="error-message">{invalidMoveMessage}</h3>
-            )}
-            {selectTeam === timeOwner && promotion && (
-              <>
-              <p>Choose a piece for promotion:</p>
-              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("q");}}>Queen</button>
-              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("r");}}>Rook</button>
-              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("b");}}>Bishop</button>
-              <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("n");}}>Knight</button>
-              </>
-            )}
-          </footer>
-        </>
+          </>
+        ) : (
+          <>
+            <header className="App-header">
+              <h3 className="timerText">
+                남은시간 :{" "}
+                {
+                  selectTeam === "w"
+                    ? (secondsWhite <= 0 
+                        ? "타임오버 패배" 
+                        : (selectTeam !== timeOwner ? `상대 턴 ${secondsWhite}초` : `${secondsWhite}초`))
+                    : (secondsBlack <= 0 
+                        ? "타임오버 패배" 
+                        : (selectTeam !== timeOwner ? `상대 턴 ${secondsBlack}초` : `${secondsBlack}초`))
+                }
+              </h3>
+              <h3 className="turn">{timeOwner === "w" ? "백 " : "흑 "} 차례</h3>
+              <button
+                className="button1"
+                onClick={() => setIsReversed(!isReversed)}
+              >
+                보드 반전
+              </button>
+              <button 
+                className="button1" 
+                onClick={() => {
+                  setResetButtonPress(1);
+                  setResetBoardFlag(true);
+                }}
+              >
+                보드 초기화
+              </button>
+            </header>
+  
+            <main className="App-main">
+              <Board
+                className="board"
+                sendMoveData={sendMoveData}
+                isReversed={isReversed}
+                resetBoardFlag={resetBoardFlag}
+                onResetComplete={() => setResetBoardFlag(false)} // 보드를 초기화 완료 시 플래그 해제
+                invalidMoveFlag={invalidMoveFlag}
+                onInvalidMoveFlagComplete={() => setInvalidMoveFlag(false)} // 이전 보드 상태로 복구 완료 시 플래그 해제
+                validMoveFlag={validMoveFlag}
+                onValidMoveFlagComplete={() => setValidMoveFlag(false)} // 유효한 움직임에 대한 보드 상태 변경 완료 시 플래그 해제
+                boardState={boardState} // 유효한 움직임에 대해 보드 상태
+                selectTeam={selectTeam} // 팀 색상
+                timeOwner={timeOwner} // 현재 턴인 색상
+  
+                castling={castling}
+                onCastlingComplete={() => setCastling(false)}
+                enpassant={enpassant}
+                onEnpassantComplete={() => setEnpassant(false)}
+  
+                promotion={promotion}
+                onPromotionComplete={() => {
+                  setPromotion(false);
+                  // 기물 교체 완료시 상대 차례로 바뀜
+                  setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
+                }}
+                promotionPiece={promotionPiece}
+                onPromotionPieceComplete={() => setPromotionPiece("")}
+              />
+            </main>
+  
+            <footer className="App-footer">
+              {invalidMoveMessage && (
+                <h3 className="error-message">{invalidMoveMessage}</h3>
+              )}
+              {selectTeam === timeOwner && promotion && (
+                <>
+                  <p>Choose a piece for promotion:</p>
+                  <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("q");}}>Queen</button>
+                  <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("r");}}>Rook</button>
+                  <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("b");}}>Bishop</button>
+                  <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("n");}}>Knight</button>
+                </>
+              )}
+            </footer>
+          </>
+        )
       )}
     </div>
   );
+  
 };
 
 export default App;
