@@ -13,7 +13,7 @@ const App = () => {
   const [selectTeam, setSelectTeam] = useState("");
 
   /*타이머 관련 변수*/
-  const initialSeconds = 3; // 초기 시간 설정
+  const initialSeconds = 1800; // 초기 시간 설정
   const [secondsWhite, setSecondsWhite] = useState(initialSeconds); // 현재 시간
   const [secondsBlack, setSecondsBlack] = useState(initialSeconds); // 현재 시간
   const [timeOwner, setTimeOwner] = useState("w"); // 시간 사용중인 팀
@@ -166,7 +166,7 @@ const App = () => {
         setResetButtonPress(0);
       }
       
-      // 현재 턴이 끝난 팀 정보를 받아 timeOwner 변수에 저장함
+      // 타이머 gameOver
       if (action2[0] === "gameOver") {
         console.log("gameOver!!!!!");
         if (selectTeamRef.current === action2[1]) {
@@ -359,11 +359,11 @@ const App = () => {
         !gameStarted || selectTeam === "" ? ( // 게임 대기 또는 팀 선택 전인 경우
           <>
             <h3>대기 중... 게임이 곧 시작됩니다.</h3>
-            <button className="button1" onClick={() => setSelectTeam("b")}>
-              흑
-            </button>
-            <button className="button1" onClick={() => setSelectTeam("w")}>
+            <button className="team-button" onClick={() => setSelectTeam("w")}>
               백
+            </button>
+            <button className="team-button" onClick={() => setSelectTeam("b")}>
+              흑
             </button>
           </>
         ) : (
@@ -375,28 +375,31 @@ const App = () => {
                   selectTeam === "w"
                     ? (secondsWhite <= 0 
                         ? "타임오버 패배" 
-                        : (selectTeam !== timeOwner ? `상대 턴 ${secondsWhite}초` : `${secondsWhite}초`))
+                        : (selectTeam !== timeOwner ? `${secondsWhite}초 [상대 턴]` : `${secondsWhite}초`))
                     : (secondsBlack <= 0 
                         ? "타임오버 패배" 
-                        : (selectTeam !== timeOwner ? `상대 턴 ${secondsBlack}초` : `${secondsBlack}초`))
+                        : (selectTeam !== timeOwner ? `${secondsBlack}초 [상대 턴]` : `${secondsBlack}초`))
                 }
               </h3>
               <h3 className="turn">{timeOwner === "w" ? "백 " : "흑 "} 차례</h3>
-              <button
-                className="button1"
-                onClick={() => setIsReversed(!isReversed)}
-              >
-                보드 반전
-              </button>
-              <button 
-                className="button1" 
-                onClick={() => {
-                  setResetButtonPress(1);
-                  setResetBoardFlag(true);
-                }}
-              >
-                보드 초기화
-              </button>
+
+              <div className="button-group">
+                <button
+                  className="button1"
+                  onClick={() => setIsReversed(!isReversed)}
+                >
+                  보드 반전
+                </button>
+                <button 
+                  className="button1" 
+                  onClick={() => {
+                    setResetButtonPress(1);
+                    setResetBoardFlag(true);
+                  }}
+                >
+                  보드 초기화
+                </button>
+              </div>
             </header>
   
             <main className="App-main">
@@ -430,18 +433,18 @@ const App = () => {
               />
             </main>
   
-            <footer className="App-footer">
+            <footer className={`App-footer ${invalidMoveMessage ? 'show-error-message' : ''}`}>
               {invalidMoveMessage && (
                 <h3 className="error-message">{invalidMoveMessage}</h3>
               )}
               {selectTeam === timeOwner && promotion && (
-                <>
+                <div className="promotion-options">
                   <p>Choose a piece for promotion:</p>
                   <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("q");}}>Queen</button>
                   <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("r");}}>Rook</button>
                   <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("b");}}>Bishop</button>
                   <button onClick={() => {setPromotionPieceButtonPress(1);setPromotionPiece("n");}}>Knight</button>
-                </>
+                </div>
               )}
             </footer>
           </>

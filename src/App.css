@@ -1,59 +1,201 @@
+/* General Settings */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif; /* Modern font choice */
+  background-color: #1c1c1e; /* Dark theme background for a professional look */
+  color: #eaeaea; /* Light text for high contrast */
+}
+
 .App {
   height: 100vh;
   width: 100vw;
-  text-align: center;
-}
-
-/*header*/
-.App-header {
-  background-color: yellow;
-	width: 700px;
-	height: 100px;
-
   display: flex;
-
-  margin-top: 3%;
-  margin-left: auto;
-  margin-right: auto;
-}
-.turn{
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 15px;
-}
-.timerText{
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 15px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.button1{ 
-  margin: auto;
-  margin-left: 10px;
+/* Header */
+.App-header {
+  background-color: #2f3542; /* Darker gray for a sleek look */
+  width: 90%;
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #f1f2f6;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 1rem;
 }
 
-/*main*/
-.App-main{
-  background-color:blue;
-	width: 700px;
-	height: 480px;
-  margin-left: auto;
-  margin-right: auto;
+.timerText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  width: 250px;
+  text-align: center;
+  color: #f1f2f6; /* Light text color */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
 }
-.board{
-  margin:auto;
-  margin-left: 110px;
+.turn {
+  font-size: 1.3rem;
+  font-weight: 600;
+  width: 140px;
+  text-align: center;
+  color: #f1f2f6; /* Light text color */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
 }
 
-/*footer*/
+/* Main Board Section */
+.App-main {
+  background-color: #3a3b3c; /* Neutral dark background */
+  width: 70%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Board */
+.board {
+  max-height: 90%;
+  max-width: 100%;
+  border: 3px solid #4b4b4b; /* Dark border around the board */
+  border-radius: 8px;
+}
+
+/* Footer */
 .App-footer {
-  background-color: green;
-	width: 700px;
-	height: 70px;
-  margin: auto;
+  background-color: #2f3542;
+  width: 90%;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  color: #f1f2f6;
+  font-size: 0.9rem;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-.error-message{
-  color: red;
+
+/* Error Message */
+.error-message {
+  color: #ff4757; /* Bright red for errors */
   font-weight: bold;
-  margin-top: 20px;
+  margin-top: 0.5rem;
+  font-size: 1.1rem; /* Increased font size */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  height: 1.4rem; /* Adjusted height to accommodate larger text */
+}
+
+/* Show error message */
+.show-error-message .error-message {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Result Message */
+.result-message {
+  background-color: #2ed573; /* Bright green for success */
+  color: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Team Selection Buttons */
+.team-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.team-button {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #1e90ff; /* Vivid blue for team selection */
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.team-button:hover {
+  background-color: #1c86ee; /* Slightly darker on hover */
+  transform: scale(1.05);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Button group to align buttons to the right */
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Button styling with smaller size */
+.button1 { 
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #ffa502; /* Vibrant orange for contrast */
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.button1:hover {
+  background-color: #e67e22;
+  transform: scale(1.05);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Promotion Options */
+.promotion-options p {
+  font-weight: bold;
+  color: #f1f2f6;
+}
+
+.promotion-options button {
+  margin: 0.4rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #1abc9c; /* Green for promotion options */
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.promotion-options button:hover {
+  background-color: #16a085;
+  transform: scale(1.05);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.4);
 }
