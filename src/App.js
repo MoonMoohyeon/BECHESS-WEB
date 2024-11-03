@@ -124,6 +124,15 @@ const App = () => {
           setEnpassant(true);
           console.log("enpassant!!!");
         }
+        else if(pieceInform[pieceInform.length-5] === "gameOver"){
+          if (selectTeamRef.current === pieceInform[pieceInform.length-9]) {
+            setResult(1);
+            console.log(selectTeamRef.current);
+          }
+          else{
+            setResult(-1);
+          }
+        }
 
         // 턴 바뀜 처리
         setTimeOwner((prevOwner) => (prevOwner === "w" ? "b" : "w"));
