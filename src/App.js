@@ -357,7 +357,7 @@ const App = () => {
         </div>
       ) : (
         !gameStarted || selectTeam === "" ? ( // 게임 대기 또는 팀 선택 전인 경우
-          <>
+          <div className="team-selection">
             <h3>대기 중... 게임이 곧 시작됩니다.</h3>
             <button className="team-button" onClick={() => setSelectTeam("w")}>
               백
@@ -365,7 +365,7 @@ const App = () => {
             <button className="team-button" onClick={() => setSelectTeam("b")}>
               흑
             </button>
-          </>
+          </div>
         ) : (
           <>
             <header className="App-header">
