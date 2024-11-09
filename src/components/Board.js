@@ -60,8 +60,8 @@ const Board = ({
 
   promotion,
   onPromotionComplete,
-  promotionPiece,
-  onPromotionPieceComplete
+  // promotionPiece,
+  // onPromotionPieceComplete
 }) => {
   const [board, setBoard] = useState(initialBoardSetup);             // 현재 보드 상태를 나타냄
   const [draggedPiece, setDraggedPiece] = useState(null);            // 마우스로 드래그한 기물 정보 저장
@@ -143,16 +143,18 @@ const Board = ({
         onEnpassantComplete();
       }
       else if(promotion===true){
-        if(promotionPiece !==""){
-          upDatedBoard[to] = { type: promotionPiece, color: color, position: position };
-          onPromotionComplete();
-          onPromotionPieceComplete();
-        }
-        else{
-          setBoard(upDatedBoard);
-          setBoardStore(upDatedBoard); //다음 기물을 옮기기 전 보드상태 저장
-          return;
-        }
+        upDatedBoard[to] = { type: "q", color: color, position: position };
+        onPromotionComplete();
+        // if(promotionPiece !==""){
+        //   upDatedBoard[to] = { type: promotionPiece, color: color, position: position };
+        //   onPromotionComplete();
+        //   onPromotionPieceComplete();
+        // }
+        // else{
+        //   setBoard(upDatedBoard);
+        //   setBoardStore(upDatedBoard); //다음 기물을 옮기기 전 보드상태 저장
+        //   return;
+        // }
       }
       
 
@@ -161,7 +163,7 @@ const Board = ({
 
       onValidMoveFlagComplete();
     }
-  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag, castling, enpassant, promotion, promotionPiece]);
+  }, [resetBoardFlag, invalidMoveFlag, validMoveFlag, castling, enpassant, promotion]);
 
   const handleDragStart = (e, piece, position) => {
     // 본인 차례일 때 드래그 가능 + promotion 중일 때 드래그 못함
